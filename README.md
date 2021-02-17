@@ -1,6 +1,6 @@
-#events
+# events
 
-##collection
+## collection
 
 add (model)
 
@@ -14,7 +14,7 @@ save
 
 destroy
 
-##model
+## model
 
 update (object)
 

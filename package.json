@@ -1,0 +1,19 @@
+{
+  "name": "bipartite",
+  "version": "1.0.0",
+  "description": "2 way data models on the browser and the server",
+  "main": "app.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mess79/bipartite.git"
+  },
+  "author": "Messtopher the first",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mess79/bipartite/issues"
+  },
+  "homepage": "https://github.com/mess79/bipartite#readme"
+}
