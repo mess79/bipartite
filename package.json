@@ -4,7 +4,9 @@
   "description": "2 way data models on the browser and the server",
   "main": "app.js",
   "scripts": {
-    "test": "test.js"
+    "test": "test.js",
+    "dev_build": "parcel watch ./demo/demo.pug",
+    "prod_build": "parcel build ./demo/demo.pug"
   },
   "repository": {
     "type": "git",
@@ -15,5 +17,10 @@
   "bugs": {
     "url": "https://github.com/mess79/bipartite/issues"
   },
-  "homepage": "https://github.com/mess79/bipartite#readme"
+  "homepage": "https://github.com/mess79/bipartite#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "pug": "^3.0.0",
+    "stylus": "^0.54.8"
+  }
 }
