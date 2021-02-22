@@ -1,5 +1,25 @@
-const mvc = require("./bipartite_server.js")
+const mvc = require("../bipartite.js");
+const fn = require("../lib.js");
+const assert = require('chai').assert;
 
+
+
+/*
+describe([String with Test Group Name], function() {
+    it([String with Test Name], function() {
+        [Test Code]
+    });
+});
+*/
+
+describe("fn", function(){
+  it("Test prune with sample JSON", function(){
+
+  })
+})
+
+
+/*
 const schemaObj = {
   fruit: String,
   name: String,
@@ -229,5 +249,5 @@ modelObj2.remove()
 modelObj2.destroy()
 modelObj2.load()
 modelObj2.save()
-
+*/
 //console.log(collectionObj.models())

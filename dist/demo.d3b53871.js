@@ -117,7 +117,228 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js":[function(require,module,exports) {
+})({"../lib.js":[function(require,module,exports) {
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+var idVar = -1;
+module.exports = {
+  clone: function clone(obj) {
+    obj = JSON.parse(JSON.stringify(obj));
+    return obj;
+  },
+  id: function id() {
+    idVar++;
+    return idVar;
+  },
+  objectTypeValidate: function objectTypeValidate(obj, type) {
+    switch (type) {
+      case "array":
+        if (Array.isArray(obj)) {} else {
+          if (!obj) {
+            obj = [];
+          } else {
+            obj = [obj];
+          }
+        }
+
+        break;
+
+      case "object":
+        if (_typeof(obj) === 'object' && obj !== null) {} else {
+          obj = {};
+        }
+
+        break;
+    }
+
+    return obj;
+  },
+  remove: function remove(obj1, obj2) {
+    var obj = {
+      updated: {},
+      removed: {},
+      added: {}
+    };
+
+    var compareRecursive = function compareRecursive(obj1, obj2, removed) {
+      for (var key in obj2) {
+        if (obj2[key] === false) {
+          removed[key] = obj1[key];
+          delete obj1[key];
+        } else if (_typeof(obj2[key]) === 'object' && Object.keys(obj2[key]).length > 0) {
+          removed[key] = {};
+          compareRecursive(obj1[key], obj2[key], obj.removed[key]);
+        }
+      }
+    };
+
+    compareRecursive(obj1, obj2, obj.removed);
+    return obj;
+  },
+  compare: function compare(obj1, obj2) {
+    var obj = {
+      updated: {},
+      removed: {},
+      added: {}
+    };
+
+    var compareRecursive = function compareRecursive(obj1, obj2, updated, removed, added) {
+      var _loop = function _loop(key) {
+        if (Array.isArray(obj1[key])) {
+          var diff = obj2[key].filter(function (x) {
+            return !obj1[key].includes(x);
+          });
+          var invDiff = obj1[key].filter(function (x) {
+            return !obj2[key].includes(x);
+          });
+
+          if (diff.length > 0 || invDiff > 0) {
+            added[key] = diff;
+            removed[key] = invDiff;
+            updated[key] = obj2[key];
+          }
+        } else {
+          if (obj2[key] === obj1[key]) {} else if (_typeof(obj1[key]) === 'object' && obj1[key] !== null && Object.keys(obj1[key]).length > 0) {
+            if (!updated[key]) {
+              updated[key] = {};
+            }
+
+            if (!removed[key]) {
+              removed[key] = {};
+            }
+
+            if (!added[key]) {
+              added[key] = {};
+            }
+
+            compareRecursive(obj1[key], obj2[key], updated[key], removed[key], added[key]);
+          } else if (obj1[key]) {
+            updated[key] = obj2[key];
+            removed[key] = obj1[key];
+          } else {
+            updated[key] = obj2[key];
+            added[key] = obj2[key];
+          }
+        }
+      };
+
+      for (var key in obj2) {
+        _loop(key);
+      }
+
+      removed = obj1;
+    };
+
+    compareRecursive(obj1, obj2, obj.updated, obj.removed, obj.added);
+    return obj;
+  },
+  prune: function prune(obj, schema) {
+    var output = {};
+
+    var compareRecursive = function compareRecursive(obj, schema, output) {
+      for (var key in schema) {
+        var option = schema[key];
+        var defaultData = "";
+
+        if (schema[key].type || schema[key].default) {
+          option = schema[key].type;
+
+          if (schema[key].default) {
+            defaultData = schema[key].default;
+          }
+        }
+
+        if (obj && _typeof(option) === 'object' && obj[key] !== null && Object.keys(obj).length > 0) {
+          output[key] = {};
+          compareRecursive(obj[key], schema[key], output[key]);
+        }
+
+        if (defaultData && !obj[key]) {
+          output[key] = defaultData;
+        } else if (obj) {
+          switch (option) {
+            case String:
+              //console.log(obj[key]);
+              if (typeof obj[key] === "string") {
+                output[key] = obj[key];
+              }
+
+              break;
+
+            case Number:
+              if (typeof obj[key] === "number") {
+                output[key] = obj[key];
+              }
+
+              break;
+
+            case Boolean:
+              if (typeof obj[key] === "boolean") {
+                output[key] = obj[key];
+              }
+
+              break;
+
+            case Array:
+              if (Array.isArray(obj[key])) {
+                output[key] = obj[key];
+              }
+
+              break;
+          }
+        }
+      }
+    };
+
+    compareRecursive(obj.obj, schema, output);
+    obj.obj = output;
+    return obj;
+  },
+  query: function query(obj, _query) {
+    var result = true;
+
+    var compareRecursive = function compareRecursive(o, q) {
+      for (var key in q) {
+        if (_typeof(q[key]) === 'object' && Object.keys(q[key]).length > 0) {
+          compareRecursive(o[key], q[key]);
+        } else if (o[key] !== q[key]) {
+          result = false;
+        }
+      }
+    };
+
+    compareRecursive(obj.obj, _query);
+    return result;
+  }
+};
+},{}],"../schema.js":[function(require,module,exports) {
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var fn = require('./lib.js');
+
+var schema = /*#__PURE__*/function () {
+  function schema(obj) {
+    _classCallCheck(this, schema);
+
+    this.obj = obj;
+  }
+
+  _createClass(schema, [{
+    key: "prune",
+    value: function prune(pruneobj) {
+      return fn.prune(pruneobj, this.obj);
+    }
+  }]);
+
+  return schema;
+}();
+
+module.exports = schema;
+},{"./lib.js":"../lib.js"}],"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js":[function(require,module,exports) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -557,207 +778,7 @@ function once(emitter, name) {
     emitter.once(name, eventListener);
   });
 }
-},{}],"../lib.js":[function(require,module,exports) {
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-var idVar = -1;
-module.exports = {
-  clone: function clone(obj) {
-    obj = JSON.parse(JSON.stringify(obj));
-    return obj;
-  },
-  id: function id() {
-    idVar++;
-    return idVar;
-  },
-  objectTypeValidate: function objectTypeValidate(obj, type) {
-    switch (type) {
-      case "array":
-        if (Array.isArray(obj)) {} else {
-          if (!obj) {
-            obj = [];
-          } else {
-            obj = [obj];
-          }
-        }
-
-        break;
-
-      case "object":
-        if (_typeof(obj) === 'object' && obj !== null) {} else {
-          obj = {};
-        }
-
-        break;
-    }
-
-    return obj;
-  },
-  remove: function remove(obj1, obj2) {
-    var obj = {
-      updated: {},
-      removed: {},
-      added: {}
-    };
-
-    var compareRecursive = function compareRecursive(obj1, obj2, removed) {
-      for (var key in obj2) {
-        if (obj2[key] === false) {
-          removed[key] = obj1[key];
-          delete obj1[key];
-        } else if (_typeof(obj2[key]) === 'object' && Object.keys(obj2[key]).length > 0) {
-          removed[key] = {};
-          compareRecursive(obj1[key], obj2[key], obj.removed[key]);
-        }
-      }
-    };
-
-    compareRecursive(obj1, obj2, obj.removed);
-    return obj;
-  },
-  compare: function compare(obj1, obj2) {
-    var obj = {
-      updated: {},
-      removed: {},
-      added: {}
-    };
-
-    var compareRecursive = function compareRecursive(obj1, obj2, updated, removed, added) {
-      var _loop = function _loop(key) {
-        if (Array.isArray(obj1[key])) {
-          var diff = obj2[key].filter(function (x) {
-            return !obj1[key].includes(x);
-          });
-          var invDiff = obj1[key].filter(function (x) {
-            return !obj2[key].includes(x);
-          });
-
-          if (diff.length > 0 || invDiff > 0) {
-            added[key] = diff;
-            removed[key] = invDiff;
-            updated[key] = obj2[key];
-          }
-        } else {
-          if (obj2[key] === obj1[key]) {} else if (_typeof(obj1[key]) === 'object' && obj1[key] !== null && Object.keys(obj1[key]).length > 0) {
-            if (!updated[key]) {
-              updated[key] = {};
-            }
-
-            if (!removed[key]) {
-              removed[key] = {};
-            }
-
-            if (!added[key]) {
-              added[key] = {};
-            }
-
-            compareRecursive(obj1[key], obj2[key], updated[key], removed[key], added[key]);
-          } else if (obj1[key]) {
-            updated[key] = obj2[key];
-            removed[key] = obj1[key];
-          } else {
-            updated[key] = obj2[key];
-            added[key] = obj2[key];
-          }
-        }
-      };
-
-      for (var key in obj2) {
-        _loop(key);
-      }
-
-      removed = obj1;
-    };
-
-    compareRecursive(obj1, obj2, obj.updated, obj.removed, obj.added);
-    return obj;
-  },
-  prune: function prune(obj, schema) {
-    var output = {};
-
-    var compareRecursive = function compareRecursive(obj, schema, output) {
-      for (var key in schema) {
-        var option = schema[key];
-        var defaultData = "";
-
-        if (schema[key].type || schema[key].default) {
-          option = schema[key].type;
-
-          if (schema[key].default) {
-            defaultData = schema[key].default;
-          }
-        }
-
-        if (obj && _typeof(option) === 'object' && obj[key] !== null && Object.keys(obj).length > 0) {
-          output[key] = {};
-          compareRecursive(obj[key], schema[key], output[key]);
-        }
-
-        if (defaultData && !obj[key]) {
-          output[key] = defaultData;
-        } else if (obj) {
-          switch (option) {
-            case String:
-              //console.log(obj[key]);
-              if (typeof obj[key] === "string") {
-                output[key] = obj[key];
-              }
-
-              break;
-
-            case Number:
-              if (typeof obj[key] === "number") {
-                output[key] = obj[key];
-              }
-
-              break;
-
-            case Boolean:
-              if (typeof obj[key] === "boolean") {
-                output[key] = obj[key];
-              }
-
-              break;
-
-            case Array:
-              if (Array.isArray(obj[key])) {
-                output[key] = obj[key];
-              }
-
-              break;
-          }
-        }
-      }
-    };
-
-    compareRecursive(obj.obj, schema, output);
-    obj.obj = output;
-    return obj;
-  },
-  query: function query(obj, _query) {
-    var result = true;
-
-    var compareRecursive = function compareRecursive(o, q) {
-      for (var key in q) {
-        if (_typeof(q[key]) === 'object' && Object.keys(q[key]).length > 0) {
-          compareRecursive(o[key], q[key]);
-        } else if (o[key] !== q[key]) {
-          result = false;
-        }
-      }
-    };
-
-    compareRecursive(obj.obj, _query);
-    return result;
-  }
-};
-},{}],"../bipartite.js":[function(require,module,exports) {
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
+},{}],"../model.js":[function(require,module,exports) {
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -767,23 +788,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var events = require('events');
 
 var fn = require('./lib.js');
-
-var schema = /*#__PURE__*/function () {
-  function schema(obj) {
-    _classCallCheck(this, schema);
-
-    this.obj = obj;
-  }
-
-  _createClass(schema, [{
-    key: "prune",
-    value: function prune(pruneobj) {
-      return fn.prune(pruneobj, this.obj);
-    }
-  }]);
-
-  return schema;
-}();
 
 var model = /*#__PURE__*/function () {
   function model(obj) {
@@ -857,6 +861,24 @@ var model = /*#__PURE__*/function () {
 
   return model;
 }();
+
+module.exports = model;
+},{"events":"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js","./lib.js":"../lib.js"}],"../collection.js":[function(require,module,exports) {
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var events = require('events');
+
+var fn = require('./lib.js');
 
 var collection = /*#__PURE__*/function () {
   function collection(obj, data) {
@@ -1036,6 +1058,18 @@ var collection = /*#__PURE__*/function () {
   return collection;
 }();
 
+module.exports = collection;
+},{"events":"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js","./lib.js":"../lib.js"}],"../controller.js":[function(require,module,exports) {
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var events = require('events');
+
+var fn = require('./lib.js');
+
 var controller = /*#__PURE__*/function () {
   function controller(obj) {
     _classCallCheck(this, controller);
@@ -1179,13 +1213,23 @@ var controller = /*#__PURE__*/function () {
   return controller;
 }();
 
+module.exports = controller;
+},{"events":"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js","./lib.js":"../lib.js"}],"../bipartite.js":[function(require,module,exports) {
+var schema = require('./schema.js');
+
+var model = require('./model.js');
+
+var collection = require('./collection.js');
+
+var controller = require('./controller.js');
+
 module.exports = {
   schema: schema,
   model: model,
   collection: collection,
   controller: controller
 };
-},{"events":"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js","./lib.js":"../lib.js"}],"demo.js":[function(require,module,exports) {
+},{"./schema.js":"../schema.js","./model.js":"../model.js","./collection.js":"../collection.js","./controller.js":"../controller.js"}],"demo.js":[function(require,module,exports) {
 var mvc = require("../bipartite.js");
 
 var schemaObj = {
