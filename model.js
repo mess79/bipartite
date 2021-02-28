@@ -15,23 +15,23 @@ class model {
   update(addObj) {
     if (addObj) {
       this.previousObj = fn.clone(this.obj)
-      this.obj = addObj
+      this.obj = fn.update(this.previousObj, addObj)
       if (this.schema) {
         this.schema.prune(this)
       }
       this.change = fn.compare(this.previousObj, this.obj)
       this.event.emit('update', this);
-      //console.log("update");
     }
   }
   remove(removeObj) {
     // to remove key from object
     if (removeObj) {
       this.previousObj = fn.clone(this.obj)
+      this.obj = fn.remove(this.previousObj, removeObj)
       if (this.schema) {
         this.schema.prune(this)
       }
-      this.change = fn.compare(this.previousObj, removeObj)
+      this.change = fn.compare(this.previousObj, this.obj)
       this.event.emit('remove', this);
     }
   }

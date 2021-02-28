@@ -144,7 +144,7 @@ module.exports = {
         break;
 
       case "object":
-        if (_typeof(obj) === 'object' && obj !== null) {} else {
+        if (_typeof(obj) === 'object' && obj !== null && !Array.isArray(obj)) {} else {
           obj = {};
         }
 
@@ -153,29 +153,44 @@ module.exports = {
 
     return obj;
   },
-  remove: function remove(obj1, obj2) {
-    var obj = {
-      updated: {},
-      removed: {},
-      added: {}
-    };
+  update: function update(obj1, obj2) {
+    obj1 = this.clone(obj1);
+    obj2 = this.clone(obj2);
 
-    var compareRecursive = function compareRecursive(obj1, obj2, removed) {
+    var compareRecursive = function compareRecursive(obj1, obj2) {
       for (var key in obj2) {
-        if (obj2[key] === false) {
-          removed[key] = obj1[key];
-          delete obj1[key];
-        } else if (_typeof(obj2[key]) === 'object' && Object.keys(obj2[key]).length > 0) {
-          removed[key] = {};
-          compareRecursive(obj1[key], obj2[key], obj.removed[key]);
+        if (_typeof(obj2[key]) === 'object' && Object.keys(obj2[key]).length > 0) {
+          compareRecursive(obj1[key], obj2[key]);
+        } else if (obj2[key]) {
+          obj1[key] = obj2[key];
         }
       }
     };
 
-    compareRecursive(obj1, obj2, obj.removed);
-    return obj;
+    compareRecursive(obj1, obj2);
+    return obj1;
+  },
+  remove: function remove(obj1, obj2) {
+    obj1 = this.clone(obj1);
+    obj2 = this.clone(obj2);
+
+    var compareRecursive = function compareRecursive(obj1, obj2) {
+      for (var key in obj2) {
+        if (obj2[key] === false) {
+          delete obj1[key];
+        } else if (_typeof(obj2[key]) === 'object' && Object.keys(obj2[key]).length > 0) {
+          compareRecursive(obj1[key], obj2[key]);
+        }
+      }
+    };
+
+    compareRecursive(obj1, obj2);
+    return obj1;
   },
   compare: function compare(obj1, obj2) {
+    //console.log(obj1, obj2)
+    obj1 = this.clone(obj1);
+    obj2 = this.clone(obj2);
     var obj = {
       updated: {},
       removed: {},
@@ -214,7 +229,7 @@ module.exports = {
             compareRecursive(obj1[key], obj2[key], updated[key], removed[key], added[key]);
           } else if (obj1[key]) {
             updated[key] = obj2[key];
-            removed[key] = obj1[key];
+            removed[key] = obj1[key]; //delete obj1[key]
           } else {
             updated[key] = obj2[key];
             added[key] = obj2[key];
@@ -225,11 +240,20 @@ module.exports = {
       for (var key in obj2) {
         _loop(key);
       }
+    };
 
-      removed = obj1;
+    var removeRecursive = function removeRecursive(obj1, obj2, removed) {
+      for (var key in obj1) {
+        if (!obj2[key]) {
+          removed[key] = obj1[key];
+        } else if (_typeof(obj1[key]) === 'object' && obj1[key] !== null && Object.keys(obj1[key]).length > 0) {
+          removeRecursive(obj1[key], obj2[key], removed[key]);
+        }
+      }
     };
 
     compareRecursive(obj1, obj2, obj.updated, obj.removed, obj.added);
+    removeRecursive(obj1, obj2, obj.removed);
     return obj;
   },
   prune: function prune(obj, schema) {
@@ -290,9 +314,8 @@ module.exports = {
       }
     };
 
-    compareRecursive(obj.obj, schema, output);
-    obj.obj = output;
-    return obj;
+    compareRecursive(obj, schema, output);
+    return output;
   },
   query: function query(obj, _query) {
     var result = true;
@@ -307,7 +330,7 @@ module.exports = {
       }
     };
 
-    compareRecursive(obj.obj, _query);
+    compareRecursive(obj, _query);
     return result;
   }
 };
@@ -809,14 +832,14 @@ var model = /*#__PURE__*/function () {
     value: function update(addObj) {
       if (addObj) {
         this.previousObj = fn.clone(this.obj);
-        this.obj = addObj;
+        this.obj = fn.update(this.previousObj, addObj);
 
         if (this.schema) {
           this.schema.prune(this);
         }
 
         this.change = fn.compare(this.previousObj, this.obj);
-        this.event.emit('update', this); //console.log("update");
+        this.event.emit('update', this);
       }
     }
   }, {
@@ -825,12 +848,13 @@ var model = /*#__PURE__*/function () {
       // to remove key from object
       if (removeObj) {
         this.previousObj = fn.clone(this.obj);
+        this.obj = fn.remove(this.previousObj, removeObj);
 
         if (this.schema) {
           this.schema.prune(this);
         }
 
-        this.change = fn.compare(this.previousObj, removeObj);
+        this.change = fn.compare(this.previousObj, this.obj);
         this.event.emit('remove', this);
       }
     }
@@ -1482,7 +1506,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "34451" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "44817" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
