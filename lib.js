@@ -34,6 +34,9 @@ module.exports = {
     const compareRecursive = function(obj1, obj2) {
       for (let key in obj2) {
         if (typeof obj2[key] === 'object' && Object.keys(obj2[key]).length > 0) {
+          if(!obj1[key]){
+            obj1[key]={}
+          }
           compareRecursive(obj1[key], obj2[key])
         } else if (obj2[key]) {
           obj1[key] = obj2[key]
