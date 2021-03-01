@@ -17,7 +17,7 @@ class model {
       this.previousObj = fn.clone(this.obj)
       this.obj = fn.update(this.previousObj, addObj)
       if (this.schema) {
-        this.schema.prune(this)
+        this.obj = this.schema.prune(this.obj)
       }
       this.change = fn.compare(this.previousObj, this.obj)
       this.event.emit('update', this);
@@ -29,7 +29,7 @@ class model {
       this.previousObj = fn.clone(this.obj)
       this.obj = fn.remove(this.previousObj, removeObj)
       if (this.schema) {
-        this.schema.prune(this)
+        this.obj = this.schema.prune(this.obj)
       }
       this.change = fn.compare(this.previousObj, this.obj)
       this.event.emit('remove', this);

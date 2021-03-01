@@ -3,7 +3,6 @@ const fn = require('./lib.js');
 
 class collection {
   constructor(obj, data) {
-    this.obj = fn.objectTypeValidate(obj, "array")
     this.event = new events.EventEmitter()
     if (data) {
       if (data.url) {
@@ -14,15 +13,23 @@ class collection {
       }
     }
     this.id = fn.id()
+    this.obj = []
+    for (let i of fn.objectTypeValidate(obj, "array")){
+      this.listeners(i)
+    }
+
   }
   add(addObj) {
+    this.listeners(addObj)
+    this.event.emit('add', this.obj, addObj);
+  }
+  listeners(addObj){
     let self = this
     // add loop to cover array of models
     if (this.schema) {
-      addObj = this.schema.prune(addObj)
       addObj.schema = this.schema
+      addObj.obj = this.schema.prune(addObj.obj)
     }
-
     function updateEvent(data) {
       self.event.emit('update', data);
     }
@@ -51,42 +58,32 @@ class collection {
         addObj.event.removeListener('load', loadEvent)
         addObj.event.removeListener('save', saveEvent)
         addObj.event.removeListener('detach', detachEvent)
+        addObj.schema = {}
       }
     };
-
     addObj.event.addListener('update', updateEvent);
-
     addObj.event.addListener('remove', removeEvent);
-
     addObj.event.addListener('destroy', destroyEvent);
-
     addObj.event.addListener('load', loadEvent)
-
     addObj.event.addListener('save', saveEvent);
-
     addObj.event.addListener('detach', detachEvent);
-
-
     this.obj = this.obj.concat(fn.objectTypeValidate(addObj, "array"))
-    this.event.emit('add', this.obj, addObj);
   }
   update(updateObj, query) {
     // to add the same update to all models - bulk
     for (let i of this.obj) {
-      if (!query || fn.query(i, query)) {
+      if (!query || fn.query(i.obj, query)) {
         i.update(updateObj)
       }
     }
-    //this.event.emit('update');
   }
   remove(removeObj, query) {
     // to remove the same update to all models - bulk
     for (let i of this.obj) {
-      if (!query || fn.query(i, query)) {
+      if (!query || fn.query(i.obj, query)) {
         i.remove(removeObj)
       }
     }
-    this.event.emit('remove');
   }
   detach(model) {
     // detach all listeners from collection for model
@@ -100,7 +97,7 @@ class collection {
   findAndDetach(query) {
     // run a query to then detach each matching model
     for (let i of this.obj) {
-      if (Object.keys(query).length > 0 && fn.query(i, query)) {
+      if (Object.keys(query).length > 0 && fn.query(i.obj, query)) {
         this.detach(i)
       }
     }

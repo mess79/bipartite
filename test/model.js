@@ -35,7 +35,7 @@ describe("model.js/update", function() {
     sinon.assert.notCalled(spy)
     model.update(updateTestData)
     sinon.assert.called(spy)
-    model.event.removeListener('update', function() {})
+    model.event.removeListener('update', spy)
   })
 })
 
@@ -48,7 +48,7 @@ describe("model.js/remove", function() {
     sinon.assert.notCalled(spy)
     model.remove(removeTestData)
     sinon.assert.called(spy)
-    model.event.removeListener('remove', function() {})
+    model.event.removeListener('remove', spy)
   })
 })
 

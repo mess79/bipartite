@@ -23,7 +23,7 @@ module.exports = {
     truthy: false,
     untruthy: "true",
     recursive: {
-      recursivething: "1st level recursive",
+      recursivething: "1st level recursive extra",
       recursivestr: 6,
       recursive: {
         recursivething: "2nd level recursive a",
@@ -145,8 +145,7 @@ module.exports = {
   query2: {
     name: "ted",
     recursive: {
-      recursivething: '1st level recursive',
-      recursivestr: 6
+      recursivething: '1st level recursive'
     }
   }
 }

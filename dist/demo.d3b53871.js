@@ -835,7 +835,7 @@ var model = /*#__PURE__*/function () {
         this.obj = fn.update(this.previousObj, addObj);
 
         if (this.schema) {
-          this.schema.prune(this);
+          this.obj = this.schema.prune(this.obj);
         }
 
         this.change = fn.compare(this.previousObj, this.obj);
@@ -851,7 +851,7 @@ var model = /*#__PURE__*/function () {
         this.obj = fn.remove(this.previousObj, removeObj);
 
         if (this.schema) {
-          this.schema.prune(this);
+          this.obj = this.schema.prune(this.obj);
         }
 
         this.change = fn.compare(this.previousObj, this.obj);
@@ -908,7 +908,6 @@ var collection = /*#__PURE__*/function () {
   function collection(obj, data) {
     _classCallCheck(this, collection);
 
-    this.obj = fn.objectTypeValidate(obj, "array");
     this.event = new events.EventEmitter();
 
     if (data) {
@@ -922,16 +921,37 @@ var collection = /*#__PURE__*/function () {
     }
 
     this.id = fn.id();
+    this.obj = [];
+
+    var _iterator = _createForOfIteratorHelper(fn.objectTypeValidate(obj, "array")),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var i = _step.value;
+        this.listeners(i);
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
   }
 
   _createClass(collection, [{
     key: "add",
     value: function add(addObj) {
+      this.listeners(addObj);
+      this.event.emit('add', this.obj, addObj);
+    }
+  }, {
+    key: "listeners",
+    value: function listeners(addObj) {
       var self = this; // add loop to cover array of models
 
       if (this.schema) {
-        addObj = this.schema.prune(addObj);
         addObj.schema = this.schema;
+        addObj.obj = this.schema.prune(addObj.obj);
       }
 
       function updateEvent(data) {
@@ -962,6 +982,7 @@ var collection = /*#__PURE__*/function () {
           addObj.event.removeListener('load', loadEvent);
           addObj.event.removeListener('save', saveEvent);
           addObj.event.removeListener('detach', detachEvent);
+          addObj.schema = {};
         }
       }
 
@@ -973,34 +994,11 @@ var collection = /*#__PURE__*/function () {
       addObj.event.addListener('save', saveEvent);
       addObj.event.addListener('detach', detachEvent);
       this.obj = this.obj.concat(fn.objectTypeValidate(addObj, "array"));
-      this.event.emit('add', this.obj, addObj);
     }
   }, {
     key: "update",
     value: function update(updateObj, query) {
       // to add the same update to all models - bulk
-      var _iterator = _createForOfIteratorHelper(this.obj),
-          _step;
-
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var i = _step.value;
-
-          if (!query || fn.query(i, query)) {
-            i.update(updateObj);
-          }
-        } //this.event.emit('update');
-
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-    }
-  }, {
-    key: "remove",
-    value: function remove(removeObj, query) {
-      // to remove the same update to all models - bulk
       var _iterator2 = _createForOfIteratorHelper(this.obj),
           _step2;
 
@@ -1008,8 +1006,8 @@ var collection = /*#__PURE__*/function () {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
           var i = _step2.value;
 
-          if (!query || fn.query(i, query)) {
-            i.remove(removeObj);
+          if (!query || fn.query(i.obj, query)) {
+            i.update(updateObj);
           }
         }
       } catch (err) {
@@ -1017,8 +1015,27 @@ var collection = /*#__PURE__*/function () {
       } finally {
         _iterator2.f();
       }
+    }
+  }, {
+    key: "remove",
+    value: function remove(removeObj, query) {
+      // to remove the same update to all models - bulk
+      var _iterator3 = _createForOfIteratorHelper(this.obj),
+          _step3;
 
-      this.event.emit('remove');
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var i = _step3.value;
+
+          if (!query || fn.query(i.obj, query)) {
+            i.remove(removeObj);
+          }
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
     }
   }, {
     key: "detach",
@@ -1035,21 +1052,21 @@ var collection = /*#__PURE__*/function () {
     key: "findAndDetach",
     value: function findAndDetach(query) {
       // run a query to then detach each matching model
-      var _iterator3 = _createForOfIteratorHelper(this.obj),
-          _step3;
+      var _iterator4 = _createForOfIteratorHelper(this.obj),
+          _step4;
 
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-          var i = _step3.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var i = _step4.value;
 
-          if (Object.keys(query).length > 0 && fn.query(i, query)) {
+          if (Object.keys(query).length > 0 && fn.query(i.obj, query)) {
             this.detach(i);
           }
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator3.f();
+        _iterator4.f();
       }
     }
   }, {
