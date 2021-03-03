@@ -146,7 +146,7 @@ controller2.detach = function(model) {
       console.log("model detach (set in controller)")
       break;
     case "collection":
-      console.log("Model: "+model.id+" removed from collection: " + this.obj.id)
+      console.log("Model: " + model.id + " removed from collection: " + this.obj.id)
       break;
   }
 }
@@ -230,4 +230,29 @@ modelObj2.destroy()
 modelObj2.load()
 modelObj2.save()
 
+window.addEventListener('load', function() {
+  //alert("It's loaded!")
+
+  el = document.getElementById("viewdemo")
+  elForm = document.getElementById("viewdemoform")
+  //console.log(el)
+
+  if (el) {
+    let view = new mvc.view(el, modelController)
+    let view2 = new mvc.view(elForm, modelController)
+  }
+
+  modelObj2.update({
+    list: ["jjhjh", "jjddddhjh", "trtjrtr", "gfgfgfffgf"],
+    fruit: "apple",
+    name: "jim",
+    more: {
+      thing: "no",
+      otherthing: "kaaakj",
+      newthing: "jsjsj",
+      list: ["more jjhjh", "more trtrtr"]
+    }
+  })
+
+})
 //console.log(collectionObj.models())

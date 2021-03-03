@@ -1105,6 +1105,12 @@ var collection = /*#__PURE__*/function () {
 
 module.exports = collection;
 },{"events":"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js","./lib.js":"../lib.js"}],"../controller.js":[function(require,module,exports) {
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -1119,22 +1125,29 @@ var controller = /*#__PURE__*/function () {
   function controller(obj) {
     _classCallCheck(this, controller);
 
+    this.views = [];
+    this.event = new events.EventEmitter();
     var self = this;
     this.obj = obj;
     this.type = obj.constructor.name;
     obj.event.addListener('update', function (data) {
+      self.view_push('update', data);
       self.update(data, self.obj.obj);
     });
     obj.event.addListener('add', function (data) {
+      self.view_push('add', data);
       self.add(data, self.obj.obj);
     });
     obj.event.addListener('remove', function (data) {
+      self.view_push('remove', data);
       self.remove(data, self.obj.obj);
     });
     obj.event.addListener('destroy', function () {
+      self.view_push('destroy');
       self.destroy();
     });
     obj.event.addListener('detach', function (data) {
+      self.view_push('detach', data);
       self.detach(data);
     });
     /*obj.event.addListener('detached', function() {
@@ -1142,17 +1155,48 @@ var controller = /*#__PURE__*/function () {
     })*/
 
     obj.event.addListener('destroyCollection', function () {
+      self.view_push('destroyCollection');
       self.destroyCollection();
     });
     obj.event.addListener('load', function () {
+      self.view_push('load');
       self.load();
     });
     obj.event.addListener('save', function () {
+      self.view_push('save');
       self.save();
     });
   }
 
   _createClass(controller, [{
+    key: "view_push",
+    value: function view_push(event) {
+      var _iterator = _createForOfIteratorHelper(this.views),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var i = _step.value;
+          i.propsUpdate(event);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+  }, {
+    key: "addView",
+    value: function addView(view) {
+      this.views.push(view);
+      view.propsUpdate();
+    }
+  }, {
+    key: "removeView",
+    value: function removeView(view) {
+      this.views.splice(this.views.indexOf(view), 1);
+    }
+  }, {
     key: "collection",
     value: function collection() {
       return this.obj.obj;
@@ -1259,6 +1303,200 @@ var controller = /*#__PURE__*/function () {
 }();
 
 module.exports = controller;
+},{"events":"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js","./lib.js":"../lib.js"}],"../view.js":[function(require,module,exports) {
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var events = require('events');
+
+var fn = require('./lib.js');
+
+var view = /*#__PURE__*/function () {
+  function view(el, controller) {
+    _classCallCheck(this, view);
+
+    this.el = el;
+    this.id = fn.id();
+    this.controller = controller;
+    this.type = controller.type;
+    this.list = this.el.querySelectorAll("[bi]");
+    this.props = [];
+    this.view_collection = []; //if (this.type === "collection") {}
+
+    for (var i = 0; i < this.list.length; i++) {
+      this.props.push(this.list[i].attributes.bi.value);
+    }
+
+    this.addView();
+    this.listen();
+  }
+
+  _createClass(view, [{
+    key: "addView",
+    value: function addView() {
+      this.controller.addView(this);
+    }
+  }, {
+    key: "removeView",
+    value: function removeView() {
+      this.controller.removeView(this); //this.stopListen()
+    }
+  }, {
+    key: "propsUpdate",
+    value: function propsUpdate(event) {
+      for (var i = 0; i < this.props.length; i++) {
+        var prop = this.props[i].split(".");
+
+        try {
+          var result = this.controller.obj.obj;
+
+          for (var p = 0; p < prop.length; p++) {
+            result = result[prop[p]];
+          }
+
+          this.viewUpdate(this.props[i], result);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    }
+  }, {
+    key: "viewUpdate",
+    value: function viewUpdate(prop, result) {
+      var _iterator = _createForOfIteratorHelper(this.list),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var p = _step.value;
+
+          if (p.getAttribute("bi") === prop) {
+            switch (p.tagName) {
+              case "DIV":
+                if (p.innerHTML !== result) {
+                  p.innerHTML = result;
+                }
+
+                break;
+
+              case "SELECT":
+              case "TEXTAREA":
+                if (p.value !== result) {
+                  p.value = result;
+                }
+
+                break;
+
+              case "INPUT":
+                switch (p.getAttribute("type")) {
+                  case "text":
+                    if (p.value !== result) {
+                      p.value = result;
+                    }
+
+                    break;
+
+                  case "radio":
+                    //fix this
+                    break;
+                }
+
+                break;
+            }
+          }
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+    /*stopListen(){
+      for (let p of this.list) {
+        p.removeEventListener("input", checkAndUpdate)
+      }
+    }*/
+
+  }, {
+    key: "listen",
+    value: function listen() {
+      var self = this;
+
+      var _iterator2 = _createForOfIteratorHelper(this.list),
+          _step2;
+
+      try {
+        var _loop = function _loop() {
+          var p = _step2.value;
+
+          var checkAndUpdate = function checkAndUpdate() {
+            //console.log("here")
+            var obj = {};
+            var props = p.getAttribute("bi").split(".");
+            var o = obj;
+
+            for (var i = 0; i < props.length; i++) {
+              var end = {};
+
+              if (i + 1 === props.length) {
+                end = p.value;
+              }
+
+              o = o[props[i]] = end;
+            }
+
+            self.controller.obj.update(obj);
+          };
+
+          switch (p.tagName) {
+            case "SELECT":
+            case "TEXTAREA":
+              p.addEventListener("input", checkAndUpdate);
+              break;
+
+            case "INPUT":
+              switch (p.getAttribute("type")) {
+                case "text":
+                  p.addEventListener("input", checkAndUpdate);
+                  break;
+
+                case "radio":
+                  console.log(p);
+                  p.addEventListener("change", function () {
+                    console.log(p.value);
+                  });
+
+                default:
+              }
+
+              break;
+          }
+        };
+
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          _loop();
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+    }
+  }]);
+
+  return view;
+}();
+
+module.exports = view;
 },{"events":"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js","./lib.js":"../lib.js"}],"../bipartite.js":[function(require,module,exports) {
 var schema = require('./schema.js');
 
@@ -1268,13 +1506,16 @@ var collection = require('./collection.js');
 
 var controller = require('./controller.js');
 
+var view = require('./view.js');
+
 module.exports = {
   schema: schema,
   model: model,
   collection: collection,
-  controller: controller
+  controller: controller,
+  view: view
 };
-},{"./schema.js":"../schema.js","./model.js":"../model.js","./collection.js":"../collection.js","./controller.js":"../controller.js"}],"demo.js":[function(require,module,exports) {
+},{"./schema.js":"../schema.js","./model.js":"../model.js","./collection.js":"../collection.js","./controller.js":"../controller.js","./view.js":"../view.js"}],"demo.js":[function(require,module,exports) {
 var mvc = require("../bipartite.js");
 
 var schemaObj = {
@@ -1498,7 +1739,29 @@ modelObj2.update({
 modelObj2.remove();
 modelObj2.destroy();
 modelObj2.load();
-modelObj2.save(); //console.log(collectionObj.models())
+modelObj2.save();
+window.addEventListener('load', function () {
+  //alert("It's loaded!")
+  el = document.getElementById("viewdemo");
+  elForm = document.getElementById("viewdemoform"); //console.log(el)
+
+  if (el) {
+    var view = new mvc.view(el, modelController);
+    var view2 = new mvc.view(elForm, modelController);
+  }
+
+  modelObj2.update({
+    list: ["jjhjh", "jjddddhjh", "trtjrtr", "gfgfgfffgf"],
+    fruit: "apple",
+    name: "jim",
+    more: {
+      thing: "no",
+      otherthing: "kaaakj",
+      newthing: "jsjsj",
+      list: ["more jjhjh", "more trtrtr"]
+    }
+  });
+}); //console.log(collectionObj.models())
 },{"../bipartite.js":"../bipartite.js"}],"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -1527,7 +1790,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "44817" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33669" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

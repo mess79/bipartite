@@ -1,3 +1,32 @@
 script(type="text/javascript" src="demo.js")
 link(href="./style.styl" rel="stylesheet")
 h1 Welcome to the Demo Page
+h3 Test view
+div#viewdemo
+  div.bi
+    div(bi="name") J-bob
+    div(bi="fruit") Kiwi
+    div(bi="recursive.recursive.recursivething") Deep check
+//form#viewdemoform
+  div.bi
+    input(bi="name", type="text", value="hhgh")
+    input(bi="fruit" type="text", value="hhgh")
+    input(bi="recursive.recursive.recursivething", type="text", value="hhgh")
+form#viewdemoform
+  div.bi
+    input(bi="name", type="text", value="hhgh")
+    select(bi="fruit")
+      option(value="bill") Bill
+      option(value="apple") Apple
+      option(value="john") John
+      option(value="frank") Frank
+    input(bi="fruit" type="text", value="hhgh")
+    textarea(bi="recursive.recursive.recursivething") hghghg
+    div
+      input(bi="fruit", type="radio", id="contactChoice1", name="contact", value="bill")
+      label(for="contactChoice1") Bill
+      input(bi="fruit", type="radio", id="contactChoice2", name="contact", value="apple")
+      label(for="contactChoice2") Apple
+      input(bi="fruit", type="radio", id="contactChoice3", name="contact", value="sam")
+      label(for="contactChoice3") Sam
+    input

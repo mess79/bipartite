@@ -3,36 +3,58 @@ const fn = require('./lib.js');
 
 class controller {
   constructor(obj) {
+    this.views = []
+    this.event = new events.EventEmitter()
     let self = this
     this.obj = obj
     this.type = obj.constructor.name
     obj.event.addListener('update', function(data) {
+      self.view_push('update', data)
       self.update(data, self.obj.obj)
     })
     obj.event.addListener('add', function(data) {
+      self.view_push('add', data)
       self.add(data, self.obj.obj)
     })
     obj.event.addListener('remove', function(data) {
+      self.view_push('remove', data)
       self.remove(data, self.obj.obj)
     })
     obj.event.addListener('destroy', function() {
+      self.view_push('destroy')
       self.destroy()
     })
     obj.event.addListener('detach', function(data) {
+      self.view_push('detach', data)
       self.detach(data)
     })
     /*obj.event.addListener('detached', function() {
       self.detached()
     })*/
     obj.event.addListener('destroyCollection', function() {
+      self.view_push('destroyCollection')
       self.destroyCollection()
     })
     obj.event.addListener('load', function() {
+      self.view_push('load')
       self.load()
     })
     obj.event.addListener('save', function() {
+      self.view_push('save')
       self.save()
     })
+  }
+  view_push(event){
+    for (let i of this.views){
+      i.propsUpdate(event)
+    }
+  }
+  addView(view){
+    this.views.push(view)
+    view.propsUpdate()
+  }
+  removeView(view){
+    this.views.splice(this.views.indexOf(view), 1)
   }
   collection() {
     return this.obj.obj
