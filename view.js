@@ -55,13 +55,17 @@ class view {
             break;
           case "INPUT":
             switch (p.getAttribute("type")) {
-              case "text":
+              case "radio":
+                if (p.value === result) {
+                  p.checked = true;
+                } else {
+                  p.checked = false;
+                }
+                break;
+              default:
                 if (p.value !== result) {
                   p.value = result
                 }
-                break;
-              case "radio":
-                //fix this
                 break;
             }
             break
@@ -78,7 +82,6 @@ class view {
     let self = this
     for (let p of this.list) {
       let checkAndUpdate = function() {
-        //console.log("here")
         let obj = {}
         let props = p.getAttribute("bi").split(".")
         let o = obj;
@@ -98,16 +101,12 @@ class view {
           break;
         case "INPUT":
           switch (p.getAttribute("type")) {
-            case "text":
+            case "radio":
+              p.addEventListener("change", checkAndUpdate)
+              break;
+            default:
               p.addEventListener("input", checkAndUpdate)
               break;
-            case "radio":
-              console.log(p)
-              p.addEventListener("change", function() {
-                console.log(p.value)
-              })
-            default:
-
           }
           break
       }

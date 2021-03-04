@@ -165,7 +165,7 @@ module.exports = {
           }
 
           compareRecursive(obj1[key], obj2[key]);
-        } else if (obj2[key]) {
+        } else if (obj2[key] || typeof obj2[key] === 'string') {
           obj1[key] = obj2[key];
         }
       }
@@ -218,6 +218,7 @@ module.exports = {
           }
         } else {
           if (obj2[key] === obj1[key]) {} else if (_typeof(obj1[key]) === 'object' && obj1[key] !== null && Object.keys(obj1[key]).length > 0) {
+            //console.log(obj2)
             if (!updated[key]) {
               updated[key] = {};
             }
@@ -232,6 +233,7 @@ module.exports = {
 
             compareRecursive(obj1[key], obj2[key], updated[key], removed[key], added[key]);
           } else if (obj1[key]) {
+            //console.log(obj2[key])
             updated[key] = obj2[key];
             removed[key] = obj1[key]; //delete obj1[key]
           } else {
@@ -257,7 +259,8 @@ module.exports = {
     };
 
     compareRecursive(obj1, obj2, obj.updated, obj.removed, obj.added);
-    removeRecursive(obj1, obj2, obj.removed);
+    removeRecursive(obj1, obj2, obj.removed); //console.log(obj)
+
     return obj;
   },
   prune: function prune(obj, schema) {
@@ -1398,15 +1401,20 @@ var view = /*#__PURE__*/function () {
 
               case "INPUT":
                 switch (p.getAttribute("type")) {
-                  case "text":
-                    if (p.value !== result) {
-                      p.value = result;
+                  case "radio":
+                    if (p.value === result) {
+                      p.checked = true;
+                    } else {
+                      p.checked = false;
                     }
 
                     break;
 
-                  case "radio":
-                    //fix this
+                  default:
+                    if (p.value !== result) {
+                      p.value = result;
+                    }
+
                     break;
                 }
 
@@ -1439,7 +1447,6 @@ var view = /*#__PURE__*/function () {
           var p = _step2.value;
 
           var checkAndUpdate = function checkAndUpdate() {
-            //console.log("here")
             var obj = {};
             var props = p.getAttribute("bi").split(".");
             var o = obj;
@@ -1465,17 +1472,13 @@ var view = /*#__PURE__*/function () {
 
             case "INPUT":
               switch (p.getAttribute("type")) {
-                case "text":
-                  p.addEventListener("input", checkAndUpdate);
+                case "radio":
+                  p.addEventListener("change", checkAndUpdate);
                   break;
 
-                case "radio":
-                  console.log(p);
-                  p.addEventListener("change", function () {
-                    console.log(p.value);
-                  });
-
                 default:
+                  p.addEventListener("input", checkAndUpdate);
+                  break;
               }
 
               break;
@@ -1790,7 +1793,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33669" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "45663" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

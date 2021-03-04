@@ -38,7 +38,7 @@ module.exports = {
             obj1[key]={}
           }
           compareRecursive(obj1[key], obj2[key])
-        } else if (obj2[key]) {
+        } else if (obj2[key] || typeof obj2[key] === 'string') {
           obj1[key] = obj2[key]
         }
       }
@@ -82,6 +82,7 @@ module.exports = {
           }
         } else {
           if (obj2[key] === obj1[key]) {} else if (typeof obj1[key] === 'object' && obj1[key] !== null && Object.keys(obj1[key]).length > 0) {
+            //console.log(obj2)
             if (!updated[key]) {
               updated[key] = {}
             }
@@ -93,6 +94,7 @@ module.exports = {
             }
             compareRecursive(obj1[key], obj2[key], updated[key], removed[key], added[key])
           } else if (obj1[key]) {
+            //console.log(obj2[key])
             updated[key] = obj2[key]
             removed[key] = obj1[key]
             //delete obj1[key]
@@ -114,6 +116,7 @@ module.exports = {
     }
     compareRecursive(obj1, obj2, obj.updated, obj.removed, obj.added)
     removeRecursive(obj1, obj2, obj.removed)
+    //console.log(obj)
     return obj;
   },
   prune: function(obj, schema) {

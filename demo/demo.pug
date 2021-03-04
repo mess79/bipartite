@@ -18,15 +18,23 @@ form#viewdemoform
     select(bi="fruit")
       option(value="bill") Bill
       option(value="apple") Apple
-      option(value="john") John
-      option(value="frank") Frank
+      optgroup(label="testing")
+        option(value="john") John
+        option(value="frank") Frank
     input(bi="fruit" type="text", value="hhgh")
     textarea(bi="recursive.recursive.recursivething") hghghg
     div
-      input(bi="fruit", type="radio", id="contactChoice1", name="contact", value="bill")
+      input(bi="fruit", type="radio", id="fruitChoice1", name="fruit", value="bill")
       label(for="contactChoice1") Bill
-      input(bi="fruit", type="radio", id="contactChoice2", name="contact", value="apple")
+      input(bi="fruit", type="radio", id="fruitChoice2", name="fruit", value="apple")
       label(for="contactChoice2") Apple
-      input(bi="fruit", type="radio", id="contactChoice3", name="contact", value="sam")
+      input(bi="fruit", type="radio", id="fruitChoice3", name="fruit", value="sam")
       label(for="contactChoice3") Sam
-    input
+      <label for="browser">Choose your browser from the list:</label>
+  input(bi="fruit", list="data_fruit", name="fruit", id="fruit")
+  datalist#data_fruit
+    option(value="bill")
+    option(value="Apple")
+    option(value="john")
+    option(value="frank")
+    option(value="jim-bob")
