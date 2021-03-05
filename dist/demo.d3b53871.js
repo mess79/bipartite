@@ -423,7 +423,7 @@ var model = /*#__PURE__*/function () {
     key: "addController",
     value: function addController(controller) {
       this.controllers.push(controller);
-      this.controller_push("update", this);
+      this.controller_push("update");
     }
   }, {
     key: "removeController",
@@ -1822,7 +1822,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "45663" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "36627" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

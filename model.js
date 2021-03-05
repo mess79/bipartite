@@ -19,7 +19,7 @@ class model {
   }
   addController(controller){
     this.controllers.push(controller)
-    this.controller_push("update", this)
+    this.controller_push("update")
   }
   removeController(controller){
     this.controllers.splice(this.controllers.indexOf(view), 1)
