@@ -155,7 +155,7 @@ module.exports = {
   },
   update: function update(obj1, obj2) {
     obj1 = this.clone(obj1);
-    obj2 = this.clone(obj2);
+    obj2 = this.clone(obj2); //console.log("update 1: "+obj2.truthy)
 
     var compareRecursive = function compareRecursive(obj1, obj2) {
       for (var key in obj2) {
@@ -165,13 +165,14 @@ module.exports = {
           }
 
           compareRecursive(obj1[key], obj2[key]);
-        } else if (obj2[key] || typeof obj2[key] === 'string') {
+        } else if (typeof obj2[key] === 'string' || typeof obj2[key] === 'boolean') {
           obj1[key] = obj2[key];
         }
       }
     };
 
-    compareRecursive(obj1, obj2);
+    compareRecursive(obj1, obj2); //console.log("update 2: "+obj2.truthy)
+
     return obj1;
   },
   remove: function remove(obj1, obj2) {
@@ -287,6 +288,7 @@ module.exports = {
         if (defaultData && !obj[key]) {
           output[key] = defaultData;
         } else if (obj) {
+          //console.log(option)
           switch (option) {
             case String:
               //console.log(obj[key]);
@@ -306,6 +308,8 @@ module.exports = {
             case Boolean:
               if (typeof obj[key] === "boolean") {
                 output[key] = obj[key];
+              } else if (obj[key] === "true" || obj[key] === "false") {
+                output[key] = obj[key] === "true";
               }
 
               break;
@@ -1352,7 +1356,8 @@ var view = /*#__PURE__*/function () {
     key: "removeView",
     value: function removeView() {
       this.controller.removeView(this); //this.stopListen()
-    }
+    } // from controller
+
   }, {
     key: "propsUpdate",
     value: function propsUpdate(event) {
@@ -1401,6 +1406,13 @@ var view = /*#__PURE__*/function () {
 
               case "INPUT":
                 switch (p.getAttribute("type")) {
+                  case "checkbox":
+                    if (p.checked !== result) {
+                      p.checked = result;
+                    }
+
+                    break;
+
                   case "radio":
                     if (p.value === result) {
                       p.checked = true;
@@ -1455,7 +1467,11 @@ var view = /*#__PURE__*/function () {
               var end = {};
 
               if (i + 1 === props.length) {
-                end = p.value;
+                if (p.tagName === "INPUT" && p.getAttribute("type") === "checkbox") {
+                  end = p.checked;
+                } else {
+                  end = p.value;
+                }
               }
 
               o = o[props[i]] = end;
@@ -1472,6 +1488,10 @@ var view = /*#__PURE__*/function () {
 
             case "INPUT":
               switch (p.getAttribute("type")) {
+                case "checkbox":
+                  p.addEventListener("change", checkAndUpdate);
+                  break;
+
                 case "radio":
                   p.addEventListener("change", checkAndUpdate);
                   break;
@@ -1553,7 +1573,7 @@ var obj2 = {
   place: "over here",
   wrongplace: "should not be here",
   list: ["jjhjh", "trtrtr"],
-  truthy: false,
+  truthy: true,
   untruthy: "true",
   recursive: {
     recursivething: "blah",

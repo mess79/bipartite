@@ -34,7 +34,7 @@ const obj2 = {
   place: "over here",
   wrongplace: "should not be here",
   list: ["jjhjh", "trtrtr"],
-  truthy: false,
+  truthy: true,
   untruthy: "true",
   recursive: {
     recursivething: "blah",

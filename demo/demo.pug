@@ -25,12 +25,11 @@ form#viewdemoform
     textarea(bi="recursive.recursive.recursivething") hghghg
     div
       input(bi="fruit", type="radio", id="fruitChoice1", name="fruit", value="bill")
-      label(for="contactChoice1") Bill
+      label(for="fruitChoice1") Bill
       input(bi="fruit", type="radio", id="fruitChoice2", name="fruit", value="apple")
-      label(for="contactChoice2") Apple
+      label(for="fruitChoice2") Apple
       input(bi="fruit", type="radio", id="fruitChoice3", name="fruit", value="sam")
-      label(for="contactChoice3") Sam
-      <label for="browser">Choose your browser from the list:</label>
+      label(for="fruitChoice3") Sam
   input(bi="fruit", list="data_fruit", name="fruit", id="fruit")
   datalist#data_fruit
     option(value="bill")
@@ -38,3 +37,8 @@ form#viewdemoform
     option(value="john")
     option(value="frank")
     option(value="jim-bob")
+  input#truth(bi="truthy", type="checkbox")
+  label(for="truth") Truthy
+  select(bi="truthy")
+    option(value="true") True
+    option(value="false") False

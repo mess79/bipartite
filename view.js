@@ -24,6 +24,7 @@ class view {
     this.controller.removeView(this)
     //this.stopListen()
   }
+  // from controller
   propsUpdate(event) {
     for (let i = 0; i < this.props.length; i++) {
       let prop = this.props[i].split(".")
@@ -55,6 +56,11 @@ class view {
             break;
           case "INPUT":
             switch (p.getAttribute("type")) {
+              case "checkbox":
+                if (p.checked !== result) {
+                  p.checked = result
+                }
+                break;
               case "radio":
                 if (p.value === result) {
                   p.checked = true;
@@ -88,7 +94,11 @@ class view {
         for (let i = 0; i < props.length; i++) {
           let end = {}
           if (i + 1 === props.length) {
-            end = p.value
+            if (p.tagName === "INPUT" && p.getAttribute("type") === "checkbox") {
+              end = p.checked
+            } else {
+              end = p.value
+            }
           }
           o = o[props[i]] = end;
         }
@@ -101,6 +111,9 @@ class view {
           break;
         case "INPUT":
           switch (p.getAttribute("type")) {
+            case "checkbox":
+              p.addEventListener("change", checkAndUpdate)
+              break;
             case "radio":
               p.addEventListener("change", checkAndUpdate)
               break;

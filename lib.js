@@ -31,6 +31,7 @@ module.exports = {
   update: function(obj1, obj2) {
     obj1 = this.clone(obj1)
     obj2 = this.clone(obj2)
+    //console.log("update 1: "+obj2.truthy)
     const compareRecursive = function(obj1, obj2) {
       for (let key in obj2) {
         if (typeof obj2[key] === 'object' && Object.keys(obj2[key]).length > 0) {
@@ -38,12 +39,13 @@ module.exports = {
             obj1[key]={}
           }
           compareRecursive(obj1[key], obj2[key])
-        } else if (obj2[key] || typeof obj2[key] === 'string') {
+        } else if (typeof obj2[key] === 'string' || typeof obj2[key] === 'boolean') {
           obj1[key] = obj2[key]
         }
       }
     }
     compareRecursive(obj1, obj2)
+    //console.log("update 2: "+obj2.truthy)
     return obj1
   },
   remove: function(obj1, obj2) {
@@ -138,6 +140,7 @@ module.exports = {
         if (defaultData && !obj[key]) {
           output[key] = defaultData;
         } else if (obj) {
+          //console.log(option)
           switch (option) {
             case String:
               //console.log(obj[key]);
@@ -153,6 +156,8 @@ module.exports = {
             case Boolean:
               if (typeof obj[key] === "boolean") {
                 output[key] = obj[key]
+              } else if (obj[key] === "true" || obj[key] === "false"){
+                output[key] = (obj[key] === "true")
               }
               break;
             case Array:
