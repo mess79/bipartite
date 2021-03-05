@@ -102,7 +102,7 @@ modelController.remove = function(model) {
 }
 
 let collectionObj = new mvc.collection(null, data)
-let controller2 = new mvc.controller(collectionObj)
+/*let controller2 = new mvc.controller(collectionObj)
 
 controller2.add = function(model) {
   switch (this.type) {
@@ -153,6 +153,7 @@ controller2.detach = function(model) {
 
 collectionObj.add(modelObj2)
 collectionObj.add(modelObj3)
+*/
 
 let updateObj = {
   fruit: "orange",

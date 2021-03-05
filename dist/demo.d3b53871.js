@@ -372,6 +372,124 @@ var schema = /*#__PURE__*/function () {
 }();
 
 module.exports = schema;
+},{"./lib.js":"../lib.js"}],"../model.js":[function(require,module,exports) {
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var fn = require('./lib.js');
+
+var model = /*#__PURE__*/function () {
+  function model(obj) {
+    _classCallCheck(this, model);
+
+    this.controllers = [];
+    this.obj = fn.clone(obj);
+    this.change = {};
+
+    if (obj._id) {
+      this.id = obj._id;
+    } else {
+      this.id = fn.id();
+    }
+  }
+
+  _createClass(model, [{
+    key: "controller_push",
+    value: function controller_push(event) {
+      var _iterator = _createForOfIteratorHelper(this.controllers),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var i = _step.value;
+          i.eventUpdate(event, this);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+  }, {
+    key: "addController",
+    value: function addController(controller) {
+      this.controllers.push(controller);
+      this.controller_push("update", this);
+    }
+  }, {
+    key: "removeController",
+    value: function removeController(controller) {
+      this.controllers.splice(this.controllers.indexOf(view), 1);
+    }
+  }, {
+    key: "update",
+    value: function update(addObj) {
+      if (addObj) {
+        this.previousObj = fn.clone(this.obj);
+        this.obj = fn.update(this.previousObj, addObj);
+
+        if (this.schema) {
+          this.obj = this.schema.prune(this.obj);
+        }
+
+        this.change = fn.compare(this.previousObj, this.obj);
+        this.controller_push("update", this);
+      }
+    }
+  }, {
+    key: "remove",
+    value: function remove(removeObj) {
+      // to remove key from object
+      if (removeObj) {
+        this.previousObj = fn.clone(this.obj);
+        this.obj = fn.remove(this.previousObj, removeObj);
+
+        if (this.schema) {
+          this.obj = this.schema.prune(this.obj);
+        }
+
+        this.change = fn.compare(this.previousObj, this.obj);
+        this.controller_push("remove", this);
+      }
+    }
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      // destory model
+      this.controller_push("destroy", this);
+    }
+  }, {
+    key: "detach",
+    value: function detach() {
+      console.log("detching from model");
+    }
+  }, {
+    key: "save",
+    value: function save() {
+      // save model (if not autosaving)
+      this.controller_push("save", this);
+    }
+  }, {
+    key: "load",
+    value: function load() {
+      // load from remote server (if not autloading)
+      this.controller_push("load", this);
+    }
+  }]);
+
+  return model;
+}();
+
+module.exports = model;
 },{"./lib.js":"../lib.js"}],"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js":[function(require,module,exports) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -812,93 +930,7 @@ function once(emitter, name) {
     emitter.once(name, eventListener);
   });
 }
-},{}],"../model.js":[function(require,module,exports) {
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var events = require('events');
-
-var fn = require('./lib.js');
-
-var model = /*#__PURE__*/function () {
-  function model(obj) {
-    _classCallCheck(this, model);
-
-    this.obj = fn.clone(obj);
-    this.event = new events.EventEmitter();
-    this.change = {};
-
-    if (obj._id) {
-      this.id = obj._id;
-    } else {
-      this.id = fn.id();
-    }
-  }
-
-  _createClass(model, [{
-    key: "update",
-    value: function update(addObj) {
-      if (addObj) {
-        this.previousObj = fn.clone(this.obj);
-        this.obj = fn.update(this.previousObj, addObj);
-
-        if (this.schema) {
-          this.obj = this.schema.prune(this.obj);
-        }
-
-        this.change = fn.compare(this.previousObj, this.obj);
-        this.event.emit('update', this);
-      }
-    }
-  }, {
-    key: "remove",
-    value: function remove(removeObj) {
-      // to remove key from object
-      if (removeObj) {
-        this.previousObj = fn.clone(this.obj);
-        this.obj = fn.remove(this.previousObj, removeObj);
-
-        if (this.schema) {
-          this.obj = this.schema.prune(this.obj);
-        }
-
-        this.change = fn.compare(this.previousObj, this.obj);
-        this.event.emit('remove', this);
-      }
-    }
-  }, {
-    key: "destroy",
-    value: function destroy() {
-      // destory model
-      this.event.emit('destroy');
-    }
-  }, {
-    key: "detach",
-    value: function detach() {
-      console.log("detching from model");
-    }
-  }, {
-    key: "save",
-    value: function save() {
-      // save model (if not autosaving)
-      this.event.emit('save');
-    }
-  }, {
-    key: "load",
-    value: function load() {
-      // load from remote server (if not autloading)
-      this.event.emit('load');
-    }
-  }]);
-
-  return model;
-}();
-
-module.exports = model;
-},{"events":"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js","./lib.js":"../lib.js"}],"../collection.js":[function(require,module,exports) {
+},{}],"../collection.js":[function(require,module,exports) {
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
@@ -1124,8 +1156,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var events = require('events');
-
+//const events = require('events');
 var fn = require('./lib.js');
 
 var controller = /*#__PURE__*/function () {
@@ -1133,49 +1164,28 @@ var controller = /*#__PURE__*/function () {
     _classCallCheck(this, controller);
 
     this.views = [];
-    this.event = new events.EventEmitter();
-    var self = this;
     this.obj = obj;
     this.type = obj.constructor.name;
-    obj.event.addListener('update', function (data) {
-      self.view_push('update', data);
-      self.update(data, self.obj.obj);
-    });
-    obj.event.addListener('add', function (data) {
-      self.view_push('add', data);
-      self.add(data, self.obj.obj);
-    });
-    obj.event.addListener('remove', function (data) {
-      self.view_push('remove', data);
-      self.remove(data, self.obj.obj);
-    });
-    obj.event.addListener('destroy', function () {
-      self.view_push('destroy');
-      self.destroy();
-    });
-    obj.event.addListener('detach', function (data) {
-      self.view_push('detach', data);
-      self.detach(data);
-    });
-    /*obj.event.addListener('detached', function() {
-      self.detached()
-    })*/
 
-    obj.event.addListener('destroyCollection', function () {
-      self.view_push('destroyCollection');
-      self.destroyCollection();
-    });
-    obj.event.addListener('load', function () {
-      self.view_push('load');
-      self.load();
-    });
-    obj.event.addListener('save', function () {
-      self.view_push('save');
-      self.save();
-    });
-  }
+    if (this.obj) {
+      this.addController();
+    }
+  } //called from within model
+
 
   _createClass(controller, [{
+    key: "addController",
+    value: function addController() {
+      this.obj.addController(this);
+    }
+  }, {
+    key: "eventUpdate",
+    value: function eventUpdate(event, origin, data) {
+      this.view_push(event);
+      this[event](data, this.obj.obj);
+    } //called from within view
+
+  }, {
     key: "view_push",
     value: function view_push(event) {
       var _iterator = _createForOfIteratorHelper(this.views),
@@ -1202,11 +1212,6 @@ var controller = /*#__PURE__*/function () {
     key: "removeView",
     value: function removeView(view) {
       this.views.splice(this.views.indexOf(view), 1);
-    }
-  }, {
-    key: "collection",
-    value: function collection() {
-      return this.obj.obj;
     }
   }, {
     key: "update",
@@ -1310,7 +1315,7 @@ var controller = /*#__PURE__*/function () {
 }();
 
 module.exports = controller;
-},{"events":"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js","./lib.js":"../lib.js"}],"../view.js":[function(require,module,exports) {
+},{"./lib.js":"../lib.js"}],"../view.js":[function(require,module,exports) {
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
@@ -1328,12 +1333,13 @@ var events = require('events');
 var fn = require('./lib.js');
 
 var view = /*#__PURE__*/function () {
-  function view(el, controller) {
+  function view(el, controller, model) {
     _classCallCheck(this, view);
 
     this.el = el;
     this.id = fn.id();
     this.controller = controller;
+    this.model = model;
     this.type = controller.type;
     this.list = this.el.querySelectorAll("[bi]");
     this.props = [];
@@ -1343,7 +1349,10 @@ var view = /*#__PURE__*/function () {
       this.props.push(this.list[i].attributes.bi.value);
     }
 
-    this.addView();
+    if (this.controller) {
+      this.addView();
+    }
+
     this.listen();
   }
 
@@ -1407,6 +1416,10 @@ var view = /*#__PURE__*/function () {
               case "INPUT":
                 switch (p.getAttribute("type")) {
                   case "checkbox":
+                    if (typeof result === "string") {
+                      result = result === "true";
+                    }
+
                     if (p.checked !== result) {
                       p.checked = result;
                     }
@@ -1641,63 +1654,59 @@ modelController.remove = function (model) {
 };
 
 var collectionObj = new mvc.collection(null, data);
-var controller2 = new mvc.controller(collectionObj);
+/*let controller2 = new mvc.controller(collectionObj)
 
-controller2.add = function (model) {
+controller2.add = function(model) {
   switch (this.type) {
     case "model":
-      console.log("model add (set in controller)");
+      console.log("model add (set in controller)")
       break;
-
     case "collection":
-      console.log("collection add (set in controller)"); //console.log(model)
-
+      console.log("collection add (set in controller)")
+      //console.log(model)
       break;
   }
-};
-
-controller2.update = function (model) {
+}
+controller2.update = function(model) {
   switch (this.type) {
     case "model":
-      console.log("model update (set in controller)"); //console.log(model.obj)
-
+      console.log("model update (set in controller)")
+      //console.log(model.obj)
       break;
-
     case "collection":
-      console.log("collection update (set in controller)"); //console.log(model.obj)
+      console.log("collection update (set in controller)")
+      //console.log(model.obj)
       //console.log(model.obj);
       //console.log(this.obj)
-
       break;
   }
-};
-
-controller2.remove = function (model) {
+}
+controller2.remove = function(model) {
   switch (this.type) {
     case "model":
-      console.log("model remove (set in controller)");
+      console.log("model remove (set in controller)")
       break;
-
     case "collection":
-      console.log("collection remove (set in controller)");
+      console.log("collection remove (set in controller)")
       break;
   }
-};
+}
 
-controller2.detach = function (model) {
+controller2.detach = function(model) {
   switch (this.type) {
     case "model":
-      console.log("model detach (set in controller)");
+      console.log("model detach (set in controller)")
       break;
-
     case "collection":
-      console.log("Model: " + model.id + " removed from collection: " + this.obj.id);
+      console.log("Model: " + model.id + " removed from collection: " + this.obj.id)
       break;
   }
-};
+}
 
-collectionObj.add(modelObj2);
-collectionObj.add(modelObj3);
+collectionObj.add(modelObj2)
+collectionObj.add(modelObj3)
+*/
+
 var updateObj = {
   fruit: "orange",
   name: "bob",

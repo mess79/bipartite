@@ -2,10 +2,11 @@ const events = require('events');
 const fn = require('./lib.js');
 
 class view {
-  constructor(el, controller) {
+  constructor(el, controller, model) {
     this.el = el;
     this.id = fn.id()
     this.controller = controller
+    this.model = model
     this.type = controller.type
     this.list = this.el.querySelectorAll("[bi]")
     this.props = []
@@ -14,7 +15,9 @@ class view {
     for (let i = 0; i < this.list.length; i++) {
       this.props.push(this.list[i].attributes.bi.value)
     }
-    this.addView()
+    if (this.controller) {
+      this.addView()
+    }
     this.listen()
   }
   addView() {
@@ -57,6 +60,9 @@ class view {
           case "INPUT":
             switch (p.getAttribute("type")) {
               case "checkbox":
+                if (typeof result === "string") {
+                  result = (result === "true")
+                }
                 if (p.checked !== result) {
                   p.checked = result
                 }

@@ -1,10 +1,9 @@
-const events = require('events');
 const fn = require('./lib.js');
 
 class model {
   constructor(obj) {
+    this.controllers = [];
     this.obj = fn.clone(obj)
-    this.event = new events.EventEmitter()
     this.change = {}
     if (obj._id) {
       this.id = obj._id
@@ -12,6 +11,20 @@ class model {
       this.id = fn.id();
     }
   }
+
+  controller_push(event){
+    for (let i of this.controllers){
+      i.eventUpdate(event, this)
+    }
+  }
+  addController(controller){
+    this.controllers.push(controller)
+    this.controller_push("update", this)
+  }
+  removeController(controller){
+    this.controllers.splice(this.controllers.indexOf(view), 1)
+  }
+
   update(addObj) {
     if (addObj) {
       this.previousObj = fn.clone(this.obj)
@@ -20,7 +33,7 @@ class model {
         this.obj = this.schema.prune(this.obj)
       }
       this.change = fn.compare(this.previousObj, this.obj)
-      this.event.emit('update', this);
+      this.controller_push("update", this)
     }
   }
   remove(removeObj) {
@@ -32,23 +45,23 @@ class model {
         this.obj = this.schema.prune(this.obj)
       }
       this.change = fn.compare(this.previousObj, this.obj)
-      this.event.emit('remove', this);
+      this.controller_push("remove", this)
     }
   }
   destroy() {
     // destory model
-    this.event.emit('destroy');
+    this.controller_push("destroy", this)
   }
   detach() {
     console.log("detching from model")
   }
   save() {
     // save model (if not autosaving)
-    this.event.emit('save');
+    this.controller_push("save", this)
   }
   load() {
     // load from remote server (if not autloading)
-    this.event.emit('load');
+    this.controller_push("load", this)
   }
 }
 
