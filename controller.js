@@ -2,21 +2,23 @@
 const fn = require('./lib.js');
 
 class controller {
-  constructor(obj) {
+  constructor(model) {
     this.views = []
-    this.obj = obj
-    this.type = obj.constructor.name
-    if (this.obj) {
+    this.model = model
+    this.id = fn.id()
+    this.type = model.constructor.name
+    if (this.model) {
       this.addController()
     }
   }
+
   //called from within model
   addController() {
-    this.obj.addController(this)
+    this.model.addController(this)
   }
-  eventUpdate(event, origin, data) {
+  eventUpdate(event, model) {
     this.view_push(event)
-    this[event](data, this.obj.obj)
+    this[event](model)
   }
 
   //called from within view
@@ -27,83 +29,36 @@ class controller {
   }
   addView(view) {
     this.views.push(view)
-    view.propsUpdate()
+    view.propsUpdate("setup")
   }
   removeView(view) {
     this.views.splice(this.views.indexOf(view), 1)
   }
-  update(data, changedata, obj) {
-    switch (this.type) {
-      case "model":
-        console.log("model update (default controller)")
-        break;
-      case "collection":
-        console.log("collection update (default controller)")
-        break;
-    }
+
+  //blank functions
+  update(model) {
+    console.log("model update (default controller)")
   }
-  add(data, changedata, obj) {
-    switch (this.type) {
-      case "model":
-        console.log("model add (default controller)")
-        break;
-      case "collection":
-        console.log("collection add (default controller)")
-        break;
-    }
+  add(model) {
+    console.log("model add (default controller)")
   }
-  remove(data, changedata, obj) {
-    switch (this.type) {
-      case "model":
-        console.log("model remove (default controller)")
-        break;
-      case "collection":
-        console.log("collection remove (default controller)")
-        break;
-    }
+  remove(model) {
+    console.log("model remove (default controller)")
   }
-  destroy(data, changedata) {
-    switch (this.type) {
-      case "model":
-        console.log("model destroy (Model) (default controller)")
-        break;
-      case "collection":
-        console.log("collection destroy (Model) (default controller)")
-        break;
-    }
+  destroy(model) {
+    console.log("model destroy (Model) (default controller)")
   }
-  detach(data) {
-    switch (this.type) {
-      case "model":
-        console.log("model detach (Model) (default controller)")
-        break;
-      case "collection":
-        console.log("collection detach (Model) (default controller)")
-        break;
-    }
+  detach(model) {
+    console.log("model detach (Model) (default controller)")
   }
-  destroyCollection(data, changedata) {
+  destroyCollection(model) {
     console.log("collection destroy (Collection) (default controller)")
   }
-  load(data, changedata) {
-    switch (this.type) {
-      case "model":
-        console.log("model load (default controller)")
-        break;
-      case "collection":
-        console.log("collection load (default controller)")
-        break;
-    }
+  load(model) {
+    console.log("model load (default controller)")
   }
-  save(data, changedata) {
-    switch (this.type) {
-      case "model":
-        console.log("model save (default controller)")
-        break;
-      case "collection":
-        console.log("collection save (default controller)")
-        break;
-    }
+  save(model) {
+    console.log("model save (default controller)")
   }
 }
 module.exports = controller

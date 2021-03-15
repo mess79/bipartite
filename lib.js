@@ -31,21 +31,30 @@ module.exports = {
   update: function(obj1, obj2) {
     obj1 = this.clone(obj1)
     obj2 = this.clone(obj2)
-    //console.log("update 1: "+obj2.truthy)
+
     const compareRecursive = function(obj1, obj2) {
       for (let key in obj2) {
-        if (typeof obj2[key] === 'object' && Object.keys(obj2[key]).length > 0) {
-          if(!obj1[key]){
-            obj1[key]={}
+        if (obj2[key] && typeof obj2[key]["*"] === "string" ||
+          obj2[key] && typeof obj2[key]["*"] === "number" ||
+          obj2[key] && typeof obj2[key]["*"] === "boolean"
+        ) {
+          obj1[key] = obj2[key]["*"]
+        } else if (Array.isArray(obj2[key])) {
+          if (!obj1[key]) {
+            obj1[key] = []
           }
           compareRecursive(obj1[key], obj2[key])
-        } else if (typeof obj2[key] === 'string' || typeof obj2[key] === 'boolean') {
+        } else if (obj2[key] && typeof obj2[key] === 'object' && Object.keys(obj2[key]).length > 0) {
+          if (!obj1[key]) {
+            obj1[key] = {}
+          }
+          compareRecursive(obj1[key], obj2[key])
+        } else if (obj2[key] && typeof obj2[key] === "number" || typeof obj2[key] === 'string' || typeof obj2[key] === 'boolean') {
           obj1[key] = obj2[key]
         }
       }
     }
     compareRecursive(obj1, obj2)
-    //console.log("update 2: "+obj2.truthy)
     return obj1
   },
   remove: function(obj1, obj2) {
@@ -107,9 +116,9 @@ module.exports = {
         }
       }
     }
-    const removeRecursive = function (obj1, obj2, removed){
+    const removeRecursive = function(obj1, obj2, removed) {
       for (let key in obj1) {
-        if(!obj2[key]){
+        if (!obj2[key]) {
           removed[key] = obj1[key]
         } else if (typeof obj1[key] === 'object' && obj1[key] !== null && Object.keys(obj1[key]).length > 0) {
           removeRecursive(obj1[key], obj2[key], removed[key])
@@ -156,7 +165,7 @@ module.exports = {
             case Boolean:
               if (typeof obj[key] === "boolean") {
                 output[key] = obj[key]
-              } else if (obj[key] === "true" || obj[key] === "false"){
+              } else if (obj[key] === "true" || obj[key] === "false") {
                 output[key] = (obj[key] === "true")
               }
               break;

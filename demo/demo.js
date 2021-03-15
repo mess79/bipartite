@@ -45,7 +45,7 @@ const obj2 = {
     }
   }
 }
-
+/*
 const obj3 = {
   name: "billy bob jimbo",
   place: "over and away",
@@ -61,13 +61,13 @@ const obj3 = {
       recursivestr: "aaaa"
     }
   }
-}
+}*/
 
 let modelObj2 = new mvc.model(obj2)
-let modelObj3 = new mvc.model(obj3)
+//let modelObj3 = new mvc.model(obj3)
 let modelController = new mvc.controller(modelObj2)
 
-
+/*
 modelController.update = function(model) {
   switch (this.type) {
     case "model":
@@ -166,7 +166,7 @@ let updateObj = {
     }
   }
 }
-
+/*
 let removeObj = {
   fruit: false,
   recursive: {
@@ -176,7 +176,7 @@ let removeObj = {
     }
   }
 }
-
+/*
 let query = {
   name: "bob",
   recursive: {
@@ -184,11 +184,12 @@ let query = {
     recursivestr: 3
   }
 }
-
+/*
 let detachQuery = {
   fruit: "orange"
 }
 
+/*
 collectionObj.update(updateObj)
 collectionObj.update(updateObj, query)
 collectionObj.remove(removeObj)
@@ -198,7 +199,7 @@ collectionObj.update(updateObj)
 collectionObj.destroyCollection()
 collectionObj.load()
 collectionObj.save()
-
+*/
 
 modelObj2.update({
   list: ["jjhjh", "jjddddhjh", "trtjrtr", "gfgfgfffgf"],
@@ -234,17 +235,29 @@ modelObj2.save()
 window.addEventListener('load', function() {
   //alert("It's loaded!")
 
-  el = document.getElementById("viewdemo")
-  elForm = document.getElementById("viewdemoform")
+  const el = document.getElementById("viewdemo")
+  const elForm = document.getElementById("viewdemoform")
+  const elMap = document.getElementById("mapViewForm")
   //console.log(el)
 
-  if (el) {
-    let view = new mvc.view(el, modelController)
-    let view2 = new mvc.view(elForm, modelController)
-  }
+
+    let view = new mvc.view({
+      el: el,
+      controller: modelController
+    })
+    let view2 = new mvc.view({
+      el: elForm,
+      controller: modelController
+    })
+    let view3 = new mvc.view({
+      el: elMap,
+      controller: modelController
+    })
+
+//console.log(view3.controller.model.obj)
 
   modelObj2.update({
-    list: ["jjhjh", "jjddddhjh", "trtjrtr", "gfgfgfffgf"],
+    list: ["jjhjh", "jjddddhjh", "trtjrtr", "gfgfgfffgf", "nope"],
     fruit: "apple",
     name: "jim",
     more: {

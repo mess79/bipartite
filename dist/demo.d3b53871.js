@@ -155,24 +155,31 @@ module.exports = {
   },
   update: function update(obj1, obj2) {
     obj1 = this.clone(obj1);
-    obj2 = this.clone(obj2); //console.log("update 1: "+obj2.truthy)
+    obj2 = this.clone(obj2);
 
     var compareRecursive = function compareRecursive(obj1, obj2) {
       for (var key in obj2) {
-        if (_typeof(obj2[key]) === 'object' && Object.keys(obj2[key]).length > 0) {
+        if (obj2[key] && typeof obj2[key]["*"] === "string" || obj2[key] && typeof obj2[key]["*"] === "number" || obj2[key] && typeof obj2[key]["*"] === "boolean") {
+          obj1[key] = obj2[key]["*"];
+        } else if (Array.isArray(obj2[key])) {
+          if (!obj1[key]) {
+            obj1[key] = [];
+          }
+
+          compareRecursive(obj1[key], obj2[key]);
+        } else if (obj2[key] && _typeof(obj2[key]) === 'object' && Object.keys(obj2[key]).length > 0) {
           if (!obj1[key]) {
             obj1[key] = {};
           }
 
           compareRecursive(obj1[key], obj2[key]);
-        } else if (typeof obj2[key] === 'string' || typeof obj2[key] === 'boolean') {
+        } else if (obj2[key] && typeof obj2[key] === "number" || typeof obj2[key] === 'string' || typeof obj2[key] === 'boolean') {
           obj1[key] = obj2[key];
         }
       }
     };
 
-    compareRecursive(obj1, obj2); //console.log("update 2: "+obj2.truthy)
-
+    compareRecursive(obj1, obj2);
     return obj1;
   },
   remove: function remove(obj1, obj2) {
@@ -435,14 +442,14 @@ var model = /*#__PURE__*/function () {
     value: function update(addObj) {
       if (addObj) {
         this.previousObj = fn.clone(this.obj);
-        this.obj = fn.update(this.previousObj, addObj);
+        this.obj = fn.update(this.previousObj, addObj); //console.log(this.obj.list)
 
         if (this.schema) {
           this.obj = this.schema.prune(this.obj);
         }
 
         this.change = fn.compare(this.previousObj, this.obj);
-        this.controller_push("update", this);
+        this.controller_push("update");
       }
     }
   }, {
@@ -458,14 +465,14 @@ var model = /*#__PURE__*/function () {
         }
 
         this.change = fn.compare(this.previousObj, this.obj);
-        this.controller_push("remove", this);
+        this.controller_push("remove");
       }
     }
   }, {
     key: "destroy",
     value: function destroy() {
       // destory model
-      this.controller_push("destroy", this);
+      this.controller_push("destroy");
     }
   }, {
     key: "detach",
@@ -476,13 +483,13 @@ var model = /*#__PURE__*/function () {
     key: "save",
     value: function save() {
       // save model (if not autosaving)
-      this.controller_push("save", this);
+      this.controller_push("save");
     }
   }, {
     key: "load",
     value: function load() {
       // load from remote server (if not autloading)
-      this.controller_push("load", this);
+      this.controller_push("load");
     }
   }]);
 
@@ -1160,14 +1167,15 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var fn = require('./lib.js');
 
 var controller = /*#__PURE__*/function () {
-  function controller(obj) {
+  function controller(model) {
     _classCallCheck(this, controller);
 
     this.views = [];
-    this.obj = obj;
-    this.type = obj.constructor.name;
+    this.model = model;
+    this.id = fn.id();
+    this.type = model.constructor.name;
 
-    if (this.obj) {
+    if (this.model) {
       this.addController();
     }
   } //called from within model
@@ -1176,13 +1184,13 @@ var controller = /*#__PURE__*/function () {
   _createClass(controller, [{
     key: "addController",
     value: function addController() {
-      this.obj.addController(this);
+      this.model.addController(this);
     }
   }, {
     key: "eventUpdate",
-    value: function eventUpdate(event, origin, data) {
+    value: function eventUpdate(event, model) {
       this.view_push(event);
-      this[event](data, this.obj.obj);
+      this[event](model);
     } //called from within view
 
   }, {
@@ -1206,108 +1214,53 @@ var controller = /*#__PURE__*/function () {
     key: "addView",
     value: function addView(view) {
       this.views.push(view);
-      view.propsUpdate();
+      view.propsUpdate("setup");
     }
   }, {
     key: "removeView",
     value: function removeView(view) {
       this.views.splice(this.views.indexOf(view), 1);
-    }
+    } //blank functions
+
   }, {
     key: "update",
-    value: function update(data, changedata, obj) {
-      switch (this.type) {
-        case "model":
-          console.log("model update (default controller)");
-          break;
-
-        case "collection":
-          console.log("collection update (default controller)");
-          break;
-      }
+    value: function update(model) {
+      console.log("model update (default controller)");
     }
   }, {
     key: "add",
-    value: function add(data, changedata, obj) {
-      switch (this.type) {
-        case "model":
-          console.log("model add (default controller)");
-          break;
-
-        case "collection":
-          console.log("collection add (default controller)");
-          break;
-      }
+    value: function add(model) {
+      console.log("model add (default controller)");
     }
   }, {
     key: "remove",
-    value: function remove(data, changedata, obj) {
-      switch (this.type) {
-        case "model":
-          console.log("model remove (default controller)");
-          break;
-
-        case "collection":
-          console.log("collection remove (default controller)");
-          break;
-      }
+    value: function remove(model) {
+      console.log("model remove (default controller)");
     }
   }, {
     key: "destroy",
-    value: function destroy(data, changedata) {
-      switch (this.type) {
-        case "model":
-          console.log("model destroy (Model) (default controller)");
-          break;
-
-        case "collection":
-          console.log("collection destroy (Model) (default controller)");
-          break;
-      }
+    value: function destroy(model) {
+      console.log("model destroy (Model) (default controller)");
     }
   }, {
     key: "detach",
-    value: function detach(data) {
-      switch (this.type) {
-        case "model":
-          console.log("model detach (Model) (default controller)");
-          break;
-
-        case "collection":
-          console.log("collection detach (Model) (default controller)");
-          break;
-      }
+    value: function detach(model) {
+      console.log("model detach (Model) (default controller)");
     }
   }, {
     key: "destroyCollection",
-    value: function destroyCollection(data, changedata) {
+    value: function destroyCollection(model) {
       console.log("collection destroy (Collection) (default controller)");
     }
   }, {
     key: "load",
-    value: function load(data, changedata) {
-      switch (this.type) {
-        case "model":
-          console.log("model load (default controller)");
-          break;
-
-        case "collection":
-          console.log("collection load (default controller)");
-          break;
-      }
+    value: function load(model) {
+      console.log("model load (default controller)");
     }
   }, {
     key: "save",
-    value: function save(data, changedata) {
-      switch (this.type) {
-        case "model":
-          console.log("model save (default controller)");
-          break;
-
-        case "collection":
-          console.log("collection save (default controller)");
-          break;
-      }
+    value: function save(model) {
+      console.log("model save (default controller)");
     }
   }]);
 
@@ -1328,25 +1281,39 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var events = require('events');
-
+//const events = require('events');
 var fn = require('./lib.js');
 
 var view = /*#__PURE__*/function () {
-  function view(el, controller, model) {
+  function view(args) {
     _classCallCheck(this, view);
 
-    this.el = el;
-    this.id = fn.id();
-    this.controller = controller;
-    this.model = model;
-    this.type = controller.type;
-    this.list = this.el.querySelectorAll("[bi]");
-    this.props = [];
-    this.view_collection = []; //if (this.type === "collection") {}
+    if (args.controller) {
+      this.controller = args.controller;
+    }
+    /*
+    //in the pipeline to use for creating full connection to controller and model from the view
+    if(args.model){
+      this.model = args.model
+    }
+    */
 
-    for (var i = 0; i < this.list.length; i++) {
-      this.props.push(this.list[i].attributes.bi.value);
+
+    if (args.el) {
+      this.el = args.el;
+    } else {
+      this.el = el;
+    }
+
+    this.id = fn.id();
+    this.list = this.el.querySelectorAll("[bi]"); //working on this
+    //this.map = this.el.querySelectorAll("[bi-map]")
+
+    this.props = [];
+    this.view_collection = [];
+
+    for (var _i = 0; _i < this.list.length; _i++) {
+      this.props.push(this.list[_i].attributes.bi.value);
     }
 
     if (this.controller) {
@@ -1370,17 +1337,25 @@ var view = /*#__PURE__*/function () {
   }, {
     key: "propsUpdate",
     value: function propsUpdate(event) {
-      for (var i = 0; i < this.props.length; i++) {
-        var prop = this.props[i].split(".");
+      for (var _i2 = 0; _i2 < this.props.length; _i2++) {
+        var prop = this.props[_i2].split(".");
 
         try {
-          var result = this.controller.obj.obj;
+          var result = this.controller.model.change.updated;
 
-          for (var p = 0; p < prop.length; p++) {
-            result = result[prop[p]];
+          if (event === "setup" || Object.keys(result).length === 0 && obj.constructor === Object) {
+            result = this.controller.model.obj;
           }
 
-          this.viewUpdate(this.props[i], result);
+          for (var p = 0; p < prop.length; p++) {
+            if (Array.isArray(result[prop[p]]) || typeof result[prop[p]] === "number" || typeof result[prop[p]] === "boolean" || typeof result[prop[p]] === "string" || result[prop[p]] && Object.keys(result[prop[p]]).length > 0 && result[prop[p]].constructor === Object) {
+              result = result[prop[p]];
+
+              if (p + 1 === prop.length) {
+                this.viewUpdate(this.props[_i2], result);
+              }
+            }
+          }
         } catch (err) {
           console.log(err);
         }
@@ -1389,6 +1364,7 @@ var view = /*#__PURE__*/function () {
   }, {
     key: "viewUpdate",
     value: function viewUpdate(prop, result) {
+      //console.log(prop, result)
       var _iterator = _createForOfIteratorHelper(this.list),
           _step;
 
@@ -1396,54 +1372,92 @@ var view = /*#__PURE__*/function () {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var p = _step.value;
 
-          if (p.getAttribute("bi") === prop) {
-            switch (p.tagName) {
-              case "DIV":
-                if (p.innerHTML !== result) {
-                  p.innerHTML = result;
+          if (p.getAttribute("bi") === prop || p.getAttribute("bi-temp") === prop) {
+            var domChanger = function domChanger(p, result) {
+              //console.log(p, result)
+              switch (p.tagName) {
+                case "DIV":
+                  if (p.innerHTML !== result) {
+                    p.innerHTML = result;
+                  }
+
+                  break;
+
+                case "SELECT":
+                case "TEXTAREA":
+                  if (p.value !== result) {
+                    p.value = result;
+                  }
+
+                  break;
+
+                case "INPUT":
+                  switch (p.getAttribute("type")) {
+                    case "checkbox":
+                      if (typeof result === "string") {
+                        result = result === "true";
+                      }
+
+                      if (p.checked !== result) {
+                        p.checked = result;
+                      }
+
+                      break;
+
+                    case "radio":
+                      if (p.value === result) {
+                        p.checked = true;
+                      } else {
+                        p.checked = false;
+                      }
+
+                      break;
+
+                    default:
+                      if (p.value !== result) {
+                        p.value = result;
+                      }
+
+                      break;
+                  }
+
+                  break;
+              }
+            };
+
+            if (Array.isArray(result) && p.getAttribute("bi-type") === "map") {
+              var items = p.querySelectorAll("[bi-type='template']"); //console.log(items)
+
+              if (items.length > 0 && !items[0].hasAttribute("bi-count")) {
+                items[0].setAttribute("bi-count", "0");
+                this.listen(items[0].querySelectorAll('[bi-temp]')); //this.listen()
+              }
+
+              for (i = items.length; i < result.length; i++) {
+                var clonedTemplate = items[0].cloneNode(true);
+                clonedTemplate.setAttribute("bi-count", i);
+                this.listen(clonedTemplate.querySelectorAll('[bi-temp]'));
+                p.appendChild(clonedTemplate);
+              } //items = p.querySelectorAll('[bi-temp]')
+
+
+              for (i = 0; i < items.length; i++) {
+                item = items[i].querySelectorAll('[bi-temp]');
+
+                for (a = 0; a < item.length; a++) {
+                  var itemProp = item[a].getAttribute("bi-temp");
+                  var itemResult = result[i][itemProp];
+
+                  if (itemProp === "*") {
+                    itemResult = result[i];
+                  }
+
+                  domChanger(item[a], itemResult);
                 }
-
-                break;
-
-              case "SELECT":
-              case "TEXTAREA":
-                if (p.value !== result) {
-                  p.value = result;
-                }
-
-                break;
-
-              case "INPUT":
-                switch (p.getAttribute("type")) {
-                  case "checkbox":
-                    if (typeof result === "string") {
-                      result = result === "true";
-                    }
-
-                    if (p.checked !== result) {
-                      p.checked = result;
-                    }
-
-                    break;
-
-                  case "radio":
-                    if (p.value === result) {
-                      p.checked = true;
-                    } else {
-                      p.checked = false;
-                    }
-
-                    break;
-
-                  default:
-                    if (p.value !== result) {
-                      p.value = result;
-                    }
-
-                    break;
-                }
-
-                break;
+              }
+            } else {
+              //console.log(p, result)
+              domChanger(p, result);
             }
           }
         }
@@ -1461,10 +1475,16 @@ var view = /*#__PURE__*/function () {
 
   }, {
     key: "listen",
-    value: function listen() {
-      var self = this;
+    value: function listen(list) {
+      /////////////////// sort out listening to arrays
+      var self = this; //console.log(this.list)
 
-      var _iterator2 = _createForOfIteratorHelper(this.list),
+      if (!list) {
+        list = this.list;
+      } //console.log(list)
+
+
+      var _iterator2 = _createForOfIteratorHelper(list),
           _step2;
 
       try {
@@ -1473,24 +1493,44 @@ var view = /*#__PURE__*/function () {
 
           var checkAndUpdate = function checkAndUpdate() {
             var obj = {};
-            var props = p.getAttribute("bi").split(".");
-            var o = obj;
+            var props = [];
+            var propsChildren = [];
+            var propCount;
 
-            for (var i = 0; i < props.length; i++) {
-              var end = {};
+            if (p.getAttribute("bi")) {
+              props = p.getAttribute("bi").split(".");
+            } else if (p.getAttribute("bi-temp")) {
+              props = p.closest("[bi-type='map']").getAttribute("bi").split("."); //.split(".")
 
-              if (i + 1 === props.length) {
-                if (p.tagName === "INPUT" && p.getAttribute("type") === "checkbox") {
-                  end = p.checked;
-                } else {
-                  end = p.value;
-                }
-              }
-
-              o = o[props[i]] = end;
+              propsChildren = p.getAttribute("bi-temp").split(".");
+              propCount = p.closest("[bi-type='template']").getAttribute("bi-count");
+              props = props.concat([propCount], propsChildren);
             }
 
-            self.controller.obj.update(obj);
+            var output = obj;
+
+            for (var _a = 0; _a <= propsChildren.length; _a++) {
+              for (var _i3 = 0; _i3 < props.length; _i3++) {
+                var end = {};
+
+                if (!isNaN(props[_i3 + 1])) {
+                  end = [];
+                }
+
+                if (_i3 + 1 === props.length) {
+                  if (p.tagName === "INPUT" && p.getAttribute("type") === "checkbox") {
+                    end = p.checked;
+                  } else {
+                    end = p.value;
+                  }
+                }
+
+                output = output[props[_i3]] = end;
+              }
+            }
+
+            console.log("view", obj);
+            self.controller.model.update(obj);
           };
 
           switch (p.tagName) {
@@ -1533,7 +1573,7 @@ var view = /*#__PURE__*/function () {
 }();
 
 module.exports = view;
-},{"events":"../../../.nvm/versions/node/v14.4.0/lib/node_modules/parcel-bundler/node_modules/events/events.js","./lib.js":"../lib.js"}],"../bipartite.js":[function(require,module,exports) {
+},{"./lib.js":"../lib.js"}],"../bipartite.js":[function(require,module,exports) {
 var schema = require('./schema.js');
 
 var model = require('./model.js');
@@ -1597,7 +1637,8 @@ var obj2 = {
     }
   }
 };
-var obj3 = {
+/*
+const obj3 = {
   name: "billy bob jimbo",
   place: "over and away",
   wrongplace: "should not be here",
@@ -1612,48 +1653,46 @@ var obj3 = {
       recursivestr: "aaaa"
     }
   }
-};
-var modelObj2 = new mvc.model(obj2);
-var modelObj3 = new mvc.model(obj3);
+}*/
+
+var modelObj2 = new mvc.model(obj2); //let modelObj3 = new mvc.model(obj3)
+
 var modelController = new mvc.controller(modelObj2);
-
-modelController.update = function (model) {
+/*
+modelController.update = function(model) {
   switch (this.type) {
     case "model":
-      console.log("model update (set in controller)");
+      console.log("model update (set in controller)")
       break;
-
     case "collection":
-      console.log("collection update (set in controller)");
+      console.log("collection update (set in controller)")
       break;
   }
-};
+}
 
-modelController.add = function (model) {
+modelController.add = function(model) {
   switch (this.type) {
     case "model":
-      console.log("model added (set in controller)");
+      console.log("model added (set in controller)")
       break;
-
     case "collection":
-      console.log("collection added (set in controller)");
+      console.log("collection added (set in controller)")
       break;
   }
-};
+}
 
-modelController.remove = function (model) {
+modelController.remove = function(model) {
   switch (this.type) {
     case "model":
-      console.log("model removed (set in controller)");
+      console.log("model removed (set in controller)")
       break;
-
     case "collection":
-      console.log("collection removed (set in controller)");
+      console.log("collection removed (set in controller)")
       break;
   }
-};
+}
 
-var collectionObj = new mvc.collection(null, data);
+let collectionObj = new mvc.collection(null, data)
 /*let controller2 = new mvc.controller(collectionObj)
 
 controller2.add = function(model) {
@@ -1718,7 +1757,8 @@ var updateObj = {
     }
   }
 };
-var removeObj = {
+/*
+let removeObj = {
   fruit: false,
   recursive: {
     recursivething: false,
@@ -1726,26 +1766,32 @@ var removeObj = {
       recursivestr: false
     }
   }
-};
-var query = {
+}
+/*
+let query = {
   name: "bob",
   recursive: {
     recursivething: "fflah",
     recursivestr: 3
   }
-};
-var detachQuery = {
+}
+/*
+let detachQuery = {
   fruit: "orange"
-};
-collectionObj.update(updateObj);
-collectionObj.update(updateObj, query);
-collectionObj.remove(removeObj);
-collectionObj.detach();
-collectionObj.findAndDetach(detachQuery);
-collectionObj.update(updateObj);
-collectionObj.destroyCollection();
-collectionObj.load();
-collectionObj.save();
+}
+
+/*
+collectionObj.update(updateObj)
+collectionObj.update(updateObj, query)
+collectionObj.remove(removeObj)
+collectionObj.detach()
+collectionObj.findAndDetach(detachQuery)
+collectionObj.update(updateObj)
+collectionObj.destroyCollection()
+collectionObj.load()
+collectionObj.save()
+*/
+
 modelObj2.update({
   list: ["jjhjh", "jjddddhjh", "trtjrtr", "gfgfgfffgf"],
   fruit: "apple",
@@ -1774,16 +1820,25 @@ modelObj2.load();
 modelObj2.save();
 window.addEventListener('load', function () {
   //alert("It's loaded!")
-  el = document.getElementById("viewdemo");
-  elForm = document.getElementById("viewdemoform"); //console.log(el)
+  var el = document.getElementById("viewdemo");
+  var elForm = document.getElementById("viewdemoform");
+  var elMap = document.getElementById("mapViewForm"); //console.log(el)
 
-  if (el) {
-    var view = new mvc.view(el, modelController);
-    var view2 = new mvc.view(elForm, modelController);
-  }
+  var view = new mvc.view({
+    el: el,
+    controller: modelController
+  });
+  var view2 = new mvc.view({
+    el: elForm,
+    controller: modelController
+  });
+  var view3 = new mvc.view({
+    el: elMap,
+    controller: modelController
+  }); //console.log(view3.controller.model.obj)
 
   modelObj2.update({
-    list: ["jjhjh", "jjddddhjh", "trtjrtr", "gfgfgfffgf"],
+    list: ["jjhjh", "jjddddhjh", "trtjrtr", "gfgfgfffgf", "nope"],
     fruit: "apple",
     name: "jim",
     more: {
@@ -1822,7 +1877,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "36627" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "42845" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

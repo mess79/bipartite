@@ -7,11 +7,6 @@ div#viewdemo
     div(bi="name") J-bob
     div(bi="fruit") Kiwi
     div(bi="recursive.recursive.recursivething") Deep check
-//form#viewdemoform
-  div.bi
-    input(bi="name", type="text", value="hhgh")
-    input(bi="fruit" type="text", value="hhgh")
-    input(bi="recursive.recursive.recursivething", type="text", value="hhgh")
 form#viewdemoform
   div.bi
     input(bi="name", type="text", value="hhgh")
@@ -42,3 +37,11 @@ form#viewdemoform
   select(bi="truthy")
     option(value="true") True
     option(value="false") False
+div#mapViewForm
+  div(bi="list", bi-type="map") map 1
+    div(bi-type="template")
+      input(bi-temp="*", type="text", value="dd")
+      div(bi-temp="*") dummy data
+  div(bi="list", bi-type="map") map 2
+    div(bi-type="template")
+      div(bi-temp="*") random map 2 data
