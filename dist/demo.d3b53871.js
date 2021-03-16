@@ -1331,7 +1331,7 @@ var view = /*#__PURE__*/function () {
   }, {
     key: "removeView",
     value: function removeView() {
-      this.controller.removeView(this); //this.stopListen()
+      this.controller.removeView(this);
     } // from controller
 
   }, {
@@ -1364,7 +1364,6 @@ var view = /*#__PURE__*/function () {
   }, {
     key: "viewUpdate",
     value: function viewUpdate(prop, result) {
-      //console.log(prop, result)
       var _iterator = _createForOfIteratorHelper(this.list),
           _step;
 
@@ -1374,7 +1373,6 @@ var view = /*#__PURE__*/function () {
 
           if (p.getAttribute("bi") === prop || p.getAttribute("bi-temp") === prop) {
             var domChanger = function domChanger(p, result) {
-              //console.log(p, result)
               switch (p.tagName) {
                 case "DIV":
                   if (p.innerHTML !== result) {
@@ -1426,20 +1424,21 @@ var view = /*#__PURE__*/function () {
             };
 
             if (Array.isArray(result) && p.getAttribute("bi-type") === "map") {
-              var items = p.querySelectorAll("[bi-type='template']"); //console.log(items)
+              var items = p.querySelectorAll("[bi-type='template']");
 
               if (items.length > 0 && !items[0].hasAttribute("bi-count")) {
                 items[0].setAttribute("bi-count", "0");
-                this.listen(items[0].querySelectorAll('[bi-temp]')); //this.listen()
+                this.listen(items[0].querySelectorAll('[bi-temp]'));
+                this.listen(items[0].querySelectorAll('[bi-button]'));
               }
 
               for (i = items.length; i < result.length; i++) {
                 var clonedTemplate = items[0].cloneNode(true);
                 clonedTemplate.setAttribute("bi-count", i);
                 this.listen(clonedTemplate.querySelectorAll('[bi-temp]'));
+                this.listen(clonedTemplate.querySelectorAll('[bi-button'));
                 p.appendChild(clonedTemplate);
-              } //items = p.querySelectorAll('[bi-temp]')
-
+              }
 
               for (i = 0; i < items.length; i++) {
                 item = items[i].querySelectorAll('[bi-temp]');
@@ -1456,7 +1455,6 @@ var view = /*#__PURE__*/function () {
                 }
               }
             } else {
-              //console.log(p, result)
               domChanger(p, result);
             }
           }
@@ -1476,13 +1474,11 @@ var view = /*#__PURE__*/function () {
   }, {
     key: "listen",
     value: function listen(list) {
-      /////////////////// sort out listening to arrays
-      var self = this; //console.log(this.list)
+      var self = this;
 
       if (!list) {
         list = this.list;
-      } //console.log(list)
-
+      }
 
       var _iterator2 = _createForOfIteratorHelper(list),
           _step2;
@@ -1490,6 +1486,36 @@ var view = /*#__PURE__*/function () {
       try {
         var _loop = function _loop() {
           var p = _step2.value;
+
+          var button = function button() {
+            var obj = {};
+            var type = p.getAttribute("bi-button");
+            var count = p.closest("[bi-count]").getAttribute("bi-count");
+            var props = p.closest("[bi-type='map']").getAttribute("bi").split(".");
+            var temps = p.closest("[bi-type='template']").querySelectorAll("[bi-temp]");
+
+            switch (type) {
+              case "addAfter":
+                console.log("after " + count + " " + props);
+                console.log(temps);
+                /*for(i = 0; i < props.length; i++){
+                  let end = {}
+                  if (!isNaN(props[i + 1])) {
+                    end = []
+                  }
+                 }*/
+
+                break;
+
+              case "addBefore":
+                console.log("before " + count + " " + props);
+                break;
+
+              case "remove":
+                console.log("remove " + count + " " + props);
+                break;
+            }
+          };
 
           var checkAndUpdate = function checkAndUpdate() {
             var obj = {};
@@ -1529,7 +1555,6 @@ var view = /*#__PURE__*/function () {
               }
             }
 
-            console.log("view", obj);
             self.controller.model.update(obj);
           };
 
@@ -1547,6 +1572,10 @@ var view = /*#__PURE__*/function () {
 
                 case "radio":
                   p.addEventListener("change", checkAndUpdate);
+                  break;
+
+                case "button":
+                  p.addEventListener("click", button);
                   break;
 
                 default:

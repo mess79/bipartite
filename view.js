@@ -37,7 +37,6 @@ class view {
   }
   removeView() {
     this.controller.removeView(this)
-    //this.stopListen()
   }
   // from controller
   propsUpdate(event) {
@@ -62,12 +61,9 @@ class view {
     }
   }
   viewUpdate(prop, result) {
-    //console.log(prop, result)
     for (let p of this.list) {
       if (p.getAttribute("bi") === prop || p.getAttribute("bi-temp") === prop) {
-
         const domChanger = function(p, result) {
-          //console.log(p, result)
           switch (p.tagName) {
             case "DIV":
               if (p.innerHTML !== result) {
@@ -108,19 +104,18 @@ class view {
         }
         if (Array.isArray(result) && p.getAttribute("bi-type") === "map") {
           let items = p.querySelectorAll("[bi-type='template']")
-          //console.log(items)
           if (items.length > 0 && !items[0].hasAttribute("bi-count")) {
             items[0].setAttribute("bi-count", "0")
             this.listen(items[0].querySelectorAll('[bi-temp]'))
-            //this.listen()
+            this.listen(items[0].querySelectorAll('[bi-button]'))
           }
           for (i = items.length; i < result.length; i++) {
             let clonedTemplate = items[0].cloneNode(true)
             clonedTemplate.setAttribute("bi-count", i)
             this.listen(clonedTemplate.querySelectorAll('[bi-temp]'))
+            this.listen(clonedTemplate.querySelectorAll('[bi-button'))
             p.appendChild(clonedTemplate)
           }
-          //items = p.querySelectorAll('[bi-temp]')
           for (i = 0; i < items.length; i++) {
             item = items[i].querySelectorAll('[bi-temp]')
             for (a = 0; a < item.length; a++) {
@@ -133,7 +128,6 @@ class view {
             }
           }
         } else {
-          //console.log(p, result)
           domChanger(p, result)
         }
       }
@@ -145,17 +139,38 @@ class view {
     }
   }*/
   listen(list) {
-
-    /////////////////// sort out listening to arrays
-
     let self = this
-    //console.log(this.list)
     if (!list) {
       list = this.list
     }
-    //console.log(list)
     for (let p of list) {
 
+      let button = function() {
+        let obj = {}
+        let type = p.getAttribute("bi-button")
+        let count = p.closest("[bi-count]").getAttribute("bi-count")
+        let props = p.closest("[bi-type='map']").getAttribute("bi").split(".")
+        let temps = p.closest("[bi-type='template']").querySelectorAll("[bi-temp]")
+        switch (type) {
+          case "addAfter":
+            console.log("after " + count + " " + props)
+            console.log(temps)
+            /*for(i = 0; i < props.length; i++){
+              let end = {}
+              if (!isNaN(props[i + 1])) {
+                end = []
+              }
+
+            }*/
+            break;
+          case "addBefore":
+            console.log("before " + count + " " + props)
+            break;
+          case "remove":
+            console.log("remove " + count + " " + props)
+            break;
+        }
+      }
 
       let checkAndUpdate = function() {
         let obj = {}
@@ -174,7 +189,7 @@ class view {
         for (let a = 0; a <= propsChildren.length; a++) {
           for (let i = 0; i < props.length; i++) {
             let end = {}
-            if (!isNaN(props[i+1])) {
+            if (!isNaN(props[i + 1])) {
               end = []
             }
             if (i + 1 === props.length) {
@@ -188,7 +203,6 @@ class view {
             output = output[props[i]] = end;
           }
         }
-        console.log("view", obj)
         self.controller.model.update(obj)
       }
       switch (p.tagName) {
@@ -203,6 +217,9 @@ class view {
               break;
             case "radio":
               p.addEventListener("change", checkAndUpdate)
+              break;
+            case "button":
+              p.addEventListener("click", button)
               break;
             default:
               p.addEventListener("input", checkAndUpdate)
