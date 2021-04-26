@@ -151,17 +151,25 @@ class view {
         let count = p.closest("[bi-count]").getAttribute("bi-count")
         let props = p.closest("[bi-type='map']").getAttribute("bi").split(".")
         let temps = p.closest("[bi-type='template']").querySelectorAll("[bi-temp]")
+        let output = obj;
         switch (type) {
           case "addAfter":
             console.log("after " + count + " " + props)
-            console.log(temps)
-            /*for(i = 0; i < props.length; i++){
+            //console.log(temps)
+            for(i = 0; i < props.length; i++){
               let end = {}
               if (!isNaN(props[i + 1])) {
                 end = []
               }
+              output = output[props[i]] = end
+            }
+            let tempProps = []
+            for(let i = 0; i < temps.length; i++){
+              tempProps[i] = temps[i].getAttribute("bi-temp").split(".")
+            }
 
-            }*/
+            console.log(tempProps)
+            self.controller.model.insert(obj)
             break;
           case "addBefore":
             console.log("before " + count + " " + props)

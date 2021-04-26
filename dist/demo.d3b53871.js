@@ -438,6 +438,11 @@ var model = /*#__PURE__*/function () {
       this.controllers.splice(this.controllers.indexOf(view), 1);
     }
   }, {
+    key: "insert",
+    value: function insert(addObj) {
+      console.log("Insert obj");
+    }
+  }, {
     key: "update",
     value: function update(addObj) {
       if (addObj) {
@@ -1493,18 +1498,30 @@ var view = /*#__PURE__*/function () {
             var count = p.closest("[bi-count]").getAttribute("bi-count");
             var props = p.closest("[bi-type='map']").getAttribute("bi").split(".");
             var temps = p.closest("[bi-type='template']").querySelectorAll("[bi-temp]");
+            var output = obj;
 
             switch (type) {
               case "addAfter":
-                console.log("after " + count + " " + props);
-                console.log(temps);
-                /*for(i = 0; i < props.length; i++){
-                  let end = {}
-                  if (!isNaN(props[i + 1])) {
-                    end = []
-                  }
-                 }*/
+                console.log("after " + count + " " + props); //console.log(temps)
 
+                for (i = 0; i < props.length; i++) {
+                  var end = {};
+
+                  if (!isNaN(props[i + 1])) {
+                    end = [];
+                  }
+
+                  output = output[props[i]] = end;
+                }
+
+                var tempProps = [];
+
+                for (var _i3 = 0; _i3 < temps.length; _i3++) {
+                  tempProps[_i3] = temps[_i3].getAttribute("bi-temp").split(".");
+                }
+
+                console.log(tempProps);
+                self.controller.model.insert(obj);
                 break;
 
               case "addBefore":
@@ -1536,14 +1553,14 @@ var view = /*#__PURE__*/function () {
             var output = obj;
 
             for (var _a = 0; _a <= propsChildren.length; _a++) {
-              for (var _i3 = 0; _i3 < props.length; _i3++) {
+              for (var _i4 = 0; _i4 < props.length; _i4++) {
                 var end = {};
 
-                if (!isNaN(props[_i3 + 1])) {
+                if (!isNaN(props[_i4 + 1])) {
                   end = [];
                 }
 
-                if (_i3 + 1 === props.length) {
+                if (_i4 + 1 === props.length) {
                   if (p.tagName === "INPUT" && p.getAttribute("type") === "checkbox") {
                     end = p.checked;
                   } else {
@@ -1551,7 +1568,7 @@ var view = /*#__PURE__*/function () {
                   }
                 }
 
-                output = output[props[_i3]] = end;
+                output = output[props[_i4]] = end;
               }
             }
 
@@ -1906,7 +1923,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "42845" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33623" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

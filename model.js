@@ -25,6 +25,9 @@ class model {
     this.controllers.splice(this.controllers.indexOf(view), 1)
   }
 
+  insert(addObj){
+      console.log("Insert obj")
+  }
   update(addObj) {
     if (addObj) {
       this.previousObj = fn.clone(this.obj)
